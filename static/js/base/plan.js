@@ -182,12 +182,6 @@ Plan.prototype.refresh = function () {
 	//Cleaning canvas
 	this.ctx.clearRect(0,0,this.pl + 1,this.pw + 1);
 	
-	if (/android/.test(navigator.userAgent.toLowerCase()) && !/chrome/.test(navigator.userAgent.toLowerCase())) {
-		this.ctx.fillStyle = "rgba(255, 255, 255, 1)";	
-		this.ctx.width = this.ctx.width;
-		this.ctx.fillRect (0, 0, this.pl + 1, this.pw + 1);
-	}
-
 	//Drawing the grid
 	if (this.draw_grid)
 		this.renderer.drawGrid(this.l,this.w);
