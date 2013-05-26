@@ -177,7 +177,7 @@ Plan.prototype.getApplianceAt = function(point) {
  * Redraw the plan
  */
 Plan.prototype.refresh = function () {
-	//console.log("Refreshing plan...");
+	console.log("Refreshing plan...");
 	
 	//Cleaning canvas
 	this.ctx.clearRect(0,0,this.pl + 1,this.pw + 1);

@@ -134,7 +134,7 @@ Energy.prototype.getMeterImage = function(width,height) {
 	var e = this;
 	img.error(function(){
 	  $(this)[0].src = '/static/img/symbols/meter.png';
-	  console.log($(this).parent().position());
+	  
 	  $(this).parent().append($('<div style="top:'+($(this).parent().height()*0.6)+'px;position:absolute;opacity:'+($(this).css('opacity'))+';left:0px;width:100%;margin:0;padding:0;text-align:center;color:'+e.color+';font-weight:bold;font-size:'+($(this).parent().width()*0.3)+'px;">'+e.title[0]+'</div>'));
 	});
 	return img;

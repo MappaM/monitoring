@@ -42,7 +42,7 @@ function clone(obj) {
 function object_to_request(obj, prefix, suffix) {
 	request = '';
 	for(var property in obj) {
-		console.log(obj,property,typeof obj[property]);
+		
 		if (typeof obj[property] === 'object')
 			if ((obj[property]) == null) {
 				request += '&' + prefix + property + suffix + '=' + null;
