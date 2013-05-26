@@ -69,7 +69,6 @@ function Plan(params) {
 	this.ctx=this.c.getContext("2d");
 	this.windows = Array(); 
 	this.windows_changed = false;
-
 	
 	//-------------------
 	// Events
@@ -191,6 +190,7 @@ Plan.prototype.refresh = function () {
 		console.log(this.canvas.height());
 		console.log(this.pl + 1);
 		console.log(this.pw + 1);
+		this.ctx.width = this.ctx.width;
 		this.ctx.fillRect(0,0,this.canvas.width(),this.canvas.height());
 		this.ctx.fillRect (0, 0, this.pl + 1, this.pw + 1);
 	}
