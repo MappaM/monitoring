@@ -143,7 +143,7 @@ var Wall = function (start,end,insulating_size,wall_size) {
 	this.end = end;
 	this.insulating_size = insulating_size;
 	this.wall_size = wall_size;
-}
+};
 
 /**
  * Return an image jquery object which represent the energy
@@ -167,4 +167,4 @@ Wall.prototype.getOrientation = function () {
 		return 'V';
 	else
 		return 'H';
-}
+};
