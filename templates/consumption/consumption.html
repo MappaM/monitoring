@@ -11,10 +11,11 @@
 	<div id ="builder_tools">
 		<script type="text/javascript">
 			var plans = new Array();		
-			var meters;		
+			var meters;
 			var meterSize = 5.0;
 			var energies_used = new Array();
 			var scrolled = false;
+			
 			//Retrieving list of all energies
 			var energies = jsonStripModel({{energies|safe}});
 			
@@ -351,8 +352,10 @@
 						var swidth='';
 		
 							
-						
+						console.log(floors);
+						console.log(floors.length);
 						for (var i=0; i<floors.length; i++) {
+							
 							var cvs = $('<canvas id="plan' + floors[i].pk +'" style="width:100%;margin:auto;" class="plan' + floors[i].pk +'" ></canvas>');
 							var container = $('<div id="plan_container' + floors[i].pk +'" style="margin:auto;position:relative;'+swidth+'" class="plan' + floors[i].pk +'"></div>');
 							$('#plans').append(container);
@@ -379,16 +382,9 @@
 							p.afterResize = function(plan){
 								window.setTimeout(function(){meterResize(plan)},100);
 							};
-							plans.push(p);						
-						
-								
-						}
-						
-						
+							plans.push(p);								
+						}						
 						$(window).smartresize(meterResize);
-						
-						
-				
 			});
 			
 			function getCurrentTool() {
