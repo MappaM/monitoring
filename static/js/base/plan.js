@@ -123,6 +123,19 @@ function Plan(params) {
 	this.items_next = 0
 
 	this.resize = function() {
+		if (/android/.test(navigator.userAgent.toLowerCase()) && !/chrome/.test(navigator.userAgent.toLowerCase())) {
+			console.log(navigator.userAgent.toLowerCase());
+			this.ctx.fillStyle = "rgba(255, 255, 255, 1)";
+			//this.ctx.fillRect (0, 0, this.pl + 1, this.pw + 1);
+			console.log(this.canvas.width());
+			console.log(this.canvas.height());
+			console.log(this.pl + 1);
+			console.log(this.pw + 1);
+			this.ctx.width = this.ctx.width;
+			this.ctx.fillRect(0,0,this.canvas.width(),this.canvas.height());
+			this.ctx.fillRect (0, 0, this.pl + 1, this.pw + 1);
+		}
+
 		if (this.beforeResize != undefined) this.beforeResize(this);
 		if (this.autoresize) {
 			this.canvas.parent().width('100%');
