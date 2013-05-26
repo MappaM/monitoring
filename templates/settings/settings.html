@@ -1,0 +1,39 @@
+{% extends "settings/settings_base.html" %}
+
+{% block settings %} 
+	<script type="text/javascript">
+		function save() {
+			var inputs = new Object();
+			$('#profile_form input').each(function() {
+				var id = $(this).attr('name');
+				if ($(this).attr('type')=='checkbox')
+					inputs[id] = $(this).is(':checked');
+				else
+					inputs[id] = $(this).val();
+			});
+			$.ajax(	{	url:'/settings/save_profile',
+						method:'post',
+						data:'csrfmiddlewaretoken={{csrf_token}}&data=' + JSON.stringify(inputs),
+						success:function() {
+							$('#result_box').hide().html("Saved...").show(500).delay(3000).hide(1500);
+						}
+					});
+		}
+	</script>
+
+	<form method="post" action="/settings/" id="profile_form">
+		<input type="checkbox" value="1" name="advanced" {% if profile.advanced %}checked="checked"{% endif %} onclick="save()"/> I am an advanced user<br />
+		<input type="checkbox" value="1" name="autoscroll" {% if profile.autoscroll %}checked="checked"{% endif %} onclick="save()"/> Enable autoscroll<br />
+	</form> <div id="result_box" style="color:blue"></div>
+	
+	<a href="/logout">Logout myself</a>
+	
+	<h2>My options</h2>
+	
+	<br />
+	<a href="/settings/users">Manage users</a>
+		
+	<h2>Advanced modifications</h2>
+	<a href="/settings/appliances">Manage appliances</a><br />
+	<a href="/settings/energies">Manage energies</a>
+{% endblock %}

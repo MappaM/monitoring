@@ -1,0 +1,88 @@
+{% extends "base/base.html" %}
+
+{% block title %}Alerts{% endblock %}
+
+{% block content %}
+	{% load compressed %}
+	{% compressed_css 'alert' %}
+	<h1>Alert</h1>
+	<div id="alert_zone">
+		<div id="piece_zone" style="display:none;overflow:hidden;">
+		</div>
+		<div id="display_zone">
+			<div style="padding:20px;text-align:center;">Select a meter at right</div>
+		</div>
+	</div>
+	<div id="plans_zone">
+		<div id="plans_container">
+			<div class="legend_container"><div class="legend meter">&nbsp;</div>Meter without alerts</div>
+			<div class="legend_container"><div class="legend meter has_blocks">&nbsp;</div>Meter with alerts</div>
+			<div class="legend_container"><div class="legend meter active">&nbsp;</div>Selected meter</div>
+			
+			<div id="overall_meters"></div>
+			<div id="plans">
+			
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+		var meters = jsonStripModel({{meters|safe}});
+		var adc_types = {{adc_types|safe}};
+		var alert_types = {{alert_types|safe}};
+		var logic_types = {{logic_types|safe}};
+		var csrf_token = '{{csrf_token}}';
+		
+		//Retrieving list of all energies
+		var energies = jsonStripModel({{energies|safe}});
+		
+		var floors = new Array();
+		{% for f in floors %}
+			{% if f.has_meters %}floors.push({pk:{{f.pk}},house:'{{f.house.pk}}',floor:'{{f.floor}}'});{% endif %}
+		{% endfor %}
+		
+		
+		
+		var plans = new Array();
+		
+		$(document).ready(function(){
+
+		for (var i=0; i<floors.length; i++) {
+			var cvs = $('<canvas id="plan' + floors[i].pk +'" style="width:100%;margin:auto;"></canvas>');
+			var container = $('<div id="plan_container' + floors[i].pk +'" style="margin:auto;position:relative;"></div>');
+			cvs.css('opacity',0.6);
+			$('#plans').append(container);
+			container.append(cvs);
+			var p = new Plan({	precision:0,
+				length:{{length|floatformat:-2}} ,
+				width:{{width|floatformat:-2}} ,
+				offsetX:{{offset.x|floatformat:-2}},
+				offsetY:{{offset.y|floatformat:-2}},
+				draw_grid:false,
+				isMeterResized:false,
+				onemeter_max:40,
+				onemeter_min:20,
+				resize_height:false,
+				colors:new Array('#1531AE','#2D3C82','#071A71','#4962D6','#6F81D6'),
+				canvas:cvs,
+				enable_keys:false});
+			p.getFloorContent(floors[i].pk);
+			p.events.register('applianceLoaded',drawCallers);		
+			plans.push(p);
+			((function(p){$(window).resize(function() {
+				drawCallers(p);
+			});})(p));
+		}
+		
+		initPieces();
+		
+	});
+
+	</script>
+	<script type="text/javascript" src="/static/js/alert/alert.js"></script>
+	{% load compressed %}
+	{% compressed_js 'builder' %}
+	{% compressed_js 'plan' %}
+	{% compressed_js 'plan_appliance' %}
+	{% compressed_js 'plan_meter' %}	
+	&nbsp;
+{% endblock %}

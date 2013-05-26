@@ -1,0 +1,87 @@
+{% extends 'builder/stage_plan.html' %}
+{% block plan_tool %}
+	<script type="text/javascript">
+		var grid_precision = 2;
+		function grid_click(e) {			
+			if ($('#tool:checked').val() == 'window') {
+				if (plan.window == undefined) return;
+				if (plan.getWindowAt(plan.cursor) != undefined) {
+					plan.displayError('There is already a window there !');
+					return;
+					
+				}
+					
+				plan.addWindow(plan.window);
+				plan.window = undefined;
+
+			} else if ($('#tool:checked').val() == 'windowRemover') { //Eraser
+				for (var i=0; i<plan.windows.length; i++) {
+					var window = plan.windows[i];
+					if ((window.center.x == plan.cursor.x) &&
+							(window.center.y == plan.cursor.y)) {
+						plan.removeWindowByIndex(i);
+						break;
+					}
+				}
+			}
+			plan.refresh();			
+		}
+		
+		function setToolByKey(e) {
+			if (e.keyCode == 69  || e.keyCode == 82) //e or r
+				$('#tool[value=windowRemover]').prop('checked',true);
+			else if (e.keyCode == 87) //w 
+				$('#tool[value=window]').prop('checked',true);
+			else return;
+			e.preventDefault();
+		}
+		
+		
+		function save(callback) {
+			if (plan.windows_changed)
+				plan.save_windows(callback,'{{house_id}}','{{csrf_token}}');
+			else
+				callback();
+		}
+	</script>
+	<div style="float:left;background-color:#dcad61;width:200px;text-align:left;">
+		<table cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="width:20px;"><input type="radio" name="tool" value="window" id="tool" checked="checked"  onclick="plan.toolChanged()"/></td><td>Window placer</td>
+		</tr>
+		<tr>
+			<td style="width:20px;"><input type="radio" name="tool" value="windowRemover" id="tool" onclick="plan.toolChanged()"/></td><td>Window remover</td>
+		</tr>
+		</table>
+	</div>
+	<div style="float:left;background-color:#cc9d51;width:300px;text-align:left;">
+		<table cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="width:120px;">Window height : </td><td><input type="text" id="window_height" onchange="checkWindow()" style="width:50px;" value="100"/>cm</td>
+		</tr>
+		<tr>
+			<td>Window width : </td><td><input type="text" id="window_width" onchange="checkWindow()" style="width:50px;" value="60"/>cm</td>
+		</tr>
+		<tr>
+			<td>Window type : </td><td><select id="window_type" onchange="checkWindow()" style="width:100px;">
+		
+			{% for type in window_types %}
+			<option value="{{type.0}}">{{type.1}}</option>
+			{% endfor %}
+						</select>
+			<td>
+		</tr>
+		</table>
+		<div id="wall_error" style="" class="form_error"></div>
+	</div>
+{% endblock %}
+{% block plan_footer %}
+	<div style="clear:both">
+		<a href="javascript:save(function(){location.href='/builder/stage4/';});" class="form_btn builder_btn_prev">&nbsp;</a>
+		<a href="javascript:save(function(){location.href='/builder/stage6/';});" class="form_btn builder_btn_next">&nbsp;</a>
+	</div>
+	
+	{% load compressed %}
+	{% compressed_js 'builder' %}
+	{% compressed_js 'plan' %}
+{% endblock %}

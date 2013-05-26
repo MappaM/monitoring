@@ -1,0 +1,120 @@
+{% extends 'builder/stage_plan.html' %}
+
+{% block plan_tool %}
+	<div style="min-width:1050px;">
+	<script type="text/javascript">
+	
+		var grid_precision = 2;
+		var moving_appliance = undefined;
+		
+		//Retrieving list of all energies
+		var energies = jsonStripModel({{energies|safe}});
+		
+		function grid_click(e) {
+			if (plan.appliance_type == undefined) return;
+			
+			
+			if (moving_appliance != undefined) { //If we are moving an appliance
+				moving_appliance.center = plan.cursor.copy();
+				plan.appliances_links.push(moving_appliance);
+				moving_appliance = undefined;
+				plan.appliance_type = plan.appliances_types[1];
+			} else if (plan.appliance_type.category != 'Remover') { //Normal mode
+				applianceVariablesSelector(plan.appliance_type,new Object(),function(values) {					
+					plan.addApplianceLink(new ApplianceLink(plan.appliance_type,plan.cursor,JSON.stringify(values)));
+					plan.setApplianceType(-1);
+				});				
+
+			} else if (plan.appliance_type.pk == -1) { //Remover
+				if (plan.selected_appliance >= 0) {
+					plan.appliances_links.remove(plan.selected_appliance);
+					plan.selected_appliance = -1;
+				} 					
+			} else if (plan.appliance_type.pk == -2) { //Mover, but not already started
+				if (plan.selected_appliance >= 0 && moving_appliance == undefined) {
+						moving_appliance = plan.appliances_links[plan.selected_appliance];
+						
+						plan.appliance_type = moving_appliance.appliance;
+						
+						plan.appliances_links.remove(plan.selected_appliance);
+						plan.selected_appliance = -1;
+						plan.toolColor = 'green';
+				} 
+			}
+			plan.refresh();			
+		}
+		
+		function planMouseMove(plan) {			
+			
+			if (plan.appliance_type != null && plan.appliance_type.pk < 0) {
+				plan.selected_appliance = plan.getApplianceAt(plan.cursor);
+				
+				if (plan.selected_appliance >= 0) {
+					plan.tool = 'appliance';
+					if (plan.appliance_type == -1)
+						plan.toolColor = 'red';
+					else
+						plan.toolColor = 'blue';
+				} else {
+					plan.tool = 'appliance';
+				}
+			} else {
+				plan.selected_appliance = -1;
+				if (plan.cursor == undefined) {
+					plan.tool = 'blank';
+				} else if (plan.isExterior({'x':plan.cursor.x - 0.5,'y':plan.cursor.y - 0.5})) {
+					plan.displayAlert('You have to place this in the house !');
+					plan.tool = 'circle';
+					plan.toolColor ='red';
+				} 
+				else {
+					plan.tool = 'appliance';
+					
+				}
+			}
+		}
+		
+		function save(callback) {
+			plan.save_appliances(callback,'{{house.pk}}','{{csrf_token}}');
+		}
+		
+		$(document).ready(function(){
+			changeCategory('H',plan);
+			plan.events.register('gridClick', grid_click);
+			plan.events.register('stateChanged', planMouseMove);
+
+		});
+	</script>
+	
+	<div id="appliance_chooser">
+		<input type="hidden" value="appliance" name="tool" id="tool" />
+		<ul id="appliance_menu">
+			{% for cat in appliance_types_categories %}
+				<li id="appliance{{cat.0}}">
+					<a href="javascript:changeCategory('{{cat.0}}',plan);" title="{{cat.1}}">{{cat.1}}</a>
+				</li>
+			{% endfor %}
+			<li id="applianceRemover" class="active modifs">
+				<a href="javascript:changeCategory('Remover',plan);" title="Modifications">Modifications</a>
+			</li>
+		</ul>
+		<ul id="appliance_list">
+			<li>Loading...</li>
+		</ul>
+		<div id="wall_error" style="" class="form_error"></div>
+	</div>
+	</div>
+	
+{% endblock %}
+{% block plan_footer %}
+	<div style="clear:both">
+		<a href="javascript:save(function(){location.href='/builder/stage5/';});" class="form_btn builder_btn_prev">&nbsp;</a>
+		<a href="javascript:save(function(){location.href='/builder/stage7/';});" class="form_btn builder_btn_next">&nbsp;</a>
+	</div>
+	
+	{% load compressed %}
+	{% compressed_js 'builder' %}
+	{% compressed_js 'plan' %}
+	{% compressed_js 'plan_appliance' %}
+	
+{% endblock %}

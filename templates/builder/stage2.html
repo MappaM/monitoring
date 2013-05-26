@@ -1,0 +1,46 @@
+{% extends 'builder/stage.html' %}
+
+{% block stage %}
+	<h1>Builder<div style="font-size:18px;font-family:'Noto Sans',sans-serif;">People living in the house</div></h1>
+	<div class="stage_content">
+	<div style="max-width:1100px;margin:auto;">
+	<div id="people_show"></div>
+	<script type="text/javascript">
+		function refreshList() {
+			$('#people_show').load('/builder/data/people/show/{{house}}');
+		}
+		
+		function deletePeople(id) {
+			$.ajax('/builder/data/people/delete/' + id,{success:refreshList});	
+		}
+		
+		function addElement() {
+			$('#stage_form').ajaxSubmit({resetForm : false, success:function(v){
+				if (v == "1") {
+					$('#stage_form').resetForm();
+					$('#stage_form_error').html("");
+					refreshList();
+				} else {
+					$('#stage_form_error').html("You must fill all fields !");
+				}
+			},
+			error:function(){$('#stage_form_error').html("You must fill all fields !")}});
+		}
+		$(document).ready(function(){
+			refreshList();
+		});
+	</script>
+	<div class="people_addzone">
+		<form action="/builder/data/people/add" method="post" id="stage_form">
+			{% include "base/form.html" %}
+			<a href="javascript:addElement();" class="form_btn builder_btn_add">&nbsp;</a>
+			<div id="stage_form_error" class="form_error" style="clear:both;"></div>
+		</form>
+	</div>
+	</div>
+	<div style="clear:both">
+		<a href="/builder/stage1/" class="form_btn builder_btn_prev">&nbsp;</a>
+		<a href="/builder/stage3/" class="form_btn builder_btn_next">&nbsp;</a>
+	</div>
+	</div>
+{% endblock %}

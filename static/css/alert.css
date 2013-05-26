@@ -1,0 +1,199 @@
+h1 {
+	background-color:rgb(30,60,105);
+	color: rgb(230,240,255);	
+}
+
+#content {
+	padding:0;
+	background-color:rgb(215,225,245); /*Old brower compatibility*/
+	background-image: linear-gradient(top, rgb(103,126,194) 0%, rgb(215,225,245) 22%, rgb(247,251,253) 94%);
+	background-image: -o-linear-gradient(top, rgb(103,126,194) 0%, rgb(215,225,245) 22%, rgb(247,251,253) 94%);
+	background-image: -moz-linear-gradient(top, rgb(103,126,194) 0%, rgb(215,225,245) 22%, rgb(247,251,253) 94%);
+	background-image: -webkit-linear-gradient(top, rgb(103,126,194) 0%, rgb(215,225,245) 22%, rgb(247,251,253) 94%);
+	background-image: -ms-linear-gradient(top, rgb(103,126,194) 0%, rgb(215,225,245) 22%, rgb(247,251,253) 94%);
+	
+	background-image: -webkit-gradient(
+		linear,
+		left top,
+		left bottom,
+		color-stop(0, rgb(103,126,194)),
+		color-stop(0.22, rgb(215,225,245)),
+		color-stop(0.94, rgb(247,251,253))
+	);
+
+}
+
+.block_container {
+	position:absolute;
+}
+
+.block_container div {
+	
+}
+
+.alert_canvas {
+	position:relative;
+	
+	font-size:10px;
+}
+
+.alert_canvas div {
+	position:absolute;
+	text-align:center;
+	
+}
+
+.alert_meter img {
+	width:70%;
+	height:70%;
+	margin:5% 30% 0 5%;
+}
+
+
+#alert_zone {
+	width:65%;
+	float:left;
+	padding:10px 5px 10px 10px;
+	box-sizing: border-box;
+	-moz-box-sizing:border-box;
+		
+}
+#display_zone {	
+	background-color:#F5F9FF;
+	border-radius:12px;	
+	padding:10px;
+	
+}
+#piece_zone {
+	background-color:#FFF0D9;
+	border-radius:12px;	
+	padding:10px;
+	min-height:110px;
+	margin-bottom:10px;
+}
+
+#plans_zone{
+	width:35%;
+	float:left;
+	padding:10px 10px 10px 5px;
+	box-sizing:border-box;
+	-moz-box-sizing:border-box;
+
+
+}
+#plans_container {
+	background-color:#C4CEDE;
+	border-radius:12px;
+	
+	padding:10px;
+	
+}
+
+#plans {
+	position:relative;
+}
+
+
+.meter {
+	background-color:rgb(30,20,100); /*Old browers*/
+	background-color:rgba(30,20,100,0.7);
+	position:absolute;
+	z-index:100;
+	cursor:pointer;
+	
+}
+
+.meter.has_blocks {
+	background-color:rgb(100,30,20); /*Old browers*/
+	background-color:rgba(100,30,20,0.7);
+}
+
+.meter.active {
+	background-color:rgb(30,100,20) !important; /*Old browers*/
+	background-color:rgba(30,100,20,0.7) !important;
+}
+
+.trash.hover {
+	background-color:rgb(20,70,10) !important;/*Old browers*/
+	background-color:rgba(20,70,10,0.7) !important;
+}
+
+.trash.active {
+	background-color:rgb(20,70,10);/*Old browers*/
+	background-color:rgba(20,70,10,0.5);
+}
+
+.legend_container {
+	height:22px;
+}
+
+.legend {
+	width:18px;
+	height:18px;
+	margin:2px;
+	float:left;
+	position:relative !important;
+}
+
+#overall_meters {
+	margin:auto;
+	margin-top:20px;
+	position:relative;		
+}
+
+.meter img {
+	
+}
+
+.piece_container {
+	position:relative;
+	
+	height:100px;
+	margin:5px;
+	float:left;
+}
+
+.alert_model div {
+	text-align:center !important;
+	width:100%;
+}
+
+.alert_model {
+	position:absolute;	
+	font-size:10px;
+	text-align:left !important;
+	color:white;
+}
+
+.alert_model img {
+width:64px;
+	height:64px;
+	margin:10px 0 0 10px!important;
+	
+	
+}
+
+.alert_droppable {
+	position:absolute;
+	
+}
+.alert_droppable.active {
+	background-color:rgba(20,70,10,0.1);
+}
+.alert_droppable.hover {
+	background-color:rgba(20,70,10,0.5);
+}
+
+#meter_chooser {
+	background-color:white;
+	border-radius:14px;
+	padding:40px;
+	width:340px;
+}
+
+#meter_chooser div {
+	display:inline;
+	cursor:pointer;
+	margin:25px 10px 10px 10px;
+}
+

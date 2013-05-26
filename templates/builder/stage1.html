@@ -1,0 +1,12 @@
+{% extends 'builder/stage.html' %}
+
+{% block stage %}
+	<h1>Builder<div style="font-size:18px;font-family:'Noto Sans',sans-serif;">House</div></h1>
+	<form action="/builder/stage1/" method="post" id="stage_form" class="stage_content">
+		{% include "base/form.html" %}
+			<a class="form_btn builder_btn_next"  href="javascript:$('#stage_form').submit();">&nbsp;</a>
+			{% if house_id %}
+				<a class="form_btn builder_btn_delete" href="/builder/house_{{house_id}}/delete">&nbsp;</a>
+			{% endif %}
+	</form>
+{% endblock %}

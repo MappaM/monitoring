@@ -1,0 +1,53 @@
+{% extends 'builder/stage.html' %}
+
+{% block stage %}
+	{% load compressed %}
+	{% compressed_js 'builder' %}
+	{% compressed_js 'plan' %}
+	<h1>Builder<div style="font-size:18px;font-family:'Noto Sans',sans-serif;">{{title}}</div></h1>
+	<div class="stage_content">
+	<link rel="stylesheet" type="text/css" media="all" href="/static/css/builder.css" />
+	<link rel="stylesheet" type="text/css" media="all" href="/static/css/plan.css" />	
+	<div id ="builder_tools">
+		<div id="floor_show" class="plan_floor_show">
+		<script type="text/javascript">
+		
+		var selectedFloor = -1;
+		var plan = undefined;
+		var floors = jsonStripModel({{floors|safe}});
+		
+		
+		
+		$(document).ready(function(){	
+			for (var i=0; i<floors.length; i++) {
+				if (floors[i].floor.contains('FLOOR'))
+					selectedFloor = i;
+			}
+			plan = new Plan({% if plan_data %}{{plan_data}}{% else %}{length:{{house.length}},width:{{house.width}},{{plan_params}}}{% endif %});
+			plan.getFloorContent(floors[selectedFloor].pk);
+			drawFloors(plan);
+			var scrolled= false;
+			
+			{% if request.user.profile.autoscroll %}
+			plan.events.register('applianceLoaded', function() {
+				if ($(window).height()< $('.stage_content').height() + $('.stage_content').offset().top && !scrolled) {
+					scrolled = true;
+					$('html, body').stop().animate({
+				        scrollTop: $('.stage_content').offset().top - 10
+				    }, 1000, 'swing');
+				}});
+			{% endif %}
+			
+		});
+		</script>
+	</div>
+	{% block plan_tool %}{% endblock %}
+	</div>
+	<div id="plan_message" style="clear:both;"></div>
+	<div id="plan_zone" style="position:relative;margin:auto;">
+		<canvas id="plan" style="margin:auto;width:100%;"></canvas>
+	</div>
+	<div id="gonext_error" class="form_error"></div>
+	{% block plan_footer %}{% endblock %}
+	</div>
+{% endblock %}

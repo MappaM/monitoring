@@ -1,0 +1,374 @@
+{% extends "base/base.html" %}
+
+{% block title %}Statistics{% endblock %}
+
+{% block content %}
+
+{% load compressed %}
+{% compressed_css 'historic' %}
+
+<h1>Statistics</h1>
+<script type="text/javascript" src="/static/js/highstock.js"></script>
+	
+		<div id="meters">
+			<div id="overall"></div>
+			<div style="clear:both;padding:10px;">
+				<a class="form_btn historic_btn_consumption" href="javascript:year('consumption');" title="Consumption">&nbsp;</a>
+				<a class="form_btn historic_btn_lhv" href="javascript:year('lhv');" title="LHV">&nbsp;</a>
+				<a class="form_btn historic_btn_price" href="javascript:year('price');" title="Price">&nbsp;</a></div>
+			<div style="overflow:hidden" id ="years">
+				<div id="year" style="width:65%;float:left;min-height:300px;"></div>
+				<div id="year_tot" style="width:35%;float:left;min-height:300px;"></div>
+			</div>
+			
+		</div>
+		<script type="text/javascript">
+			var meters = jsonStripModel({{power_meters_json|safe}});
+			var year_data;
+			/**
+			 * Prints the year graphic
+			 */
+			function year(mode) {			
+				var data;
+				var months_series = new Array();
+				var tot_unit = '';
+				var total = new Array();
+				var yAxis;
+
+				if (mode == 'lhv') {
+					tot_unit = 'kWh';
+					data = year_data.slice(0);
+					data[1] = year_data[1].slice(0)
+					for (var i = 0;i < meters.length; i++) {
+						var sum = 0;
+						data[1][i] = year_data[1][i].slice(0)	
+						if (meters[i].energy.lhv <= 0) {
+							continue;
+						}
+						
+						for (var m = 0; m < 12; m++) {
+							data[1][i][m] = data[1][i][m] * meters[i].energy.lhv;	
+							sum += data[1][i][m];
+						}
+						
+			    		total.push({
+			    			name : meters[i].energy.title,
+							color:meters[i].energy.color,
+							y:sum});
+						months_series.push({
+					       			type:'column',
+									name : meters[i].energy.title,
+									data : data[1][i],
+									color:meters[i].energy.color,
+									tooltip: {
+										valueDecimals: 2,
+					                    valueSuffix: 'kWh',
+					                    useHTML:true,
+					                    shared:true,
+					                }
+						});
+						
+					}
+					yAxis = [
+				               
+				               {
+				            	   labels: {
+				                       formatter: function() {
+				                           return this.value + 'kWh';
+				                       },
+				                       useHTML:true,
+				                       style: {
+				                           color: '#555555'
+				                       },
+				                   },
+				                   title: {
+				                       text: 'Lower Heat of Combustion',
+				                       
+				                   }
+				               	
+				            	}];
+				} else if (mode == 'price') {
+					tot_unit = '€';
+					data = year_data.slice(0);
+					data[1] = year_data[1].slice(0)
+					
+					for (var i = 0;i < meters.length; i++) {
+						var sum = 0;
+						data[1][i] = year_data[1][i].slice(0)	
+						
+						if (meters[i].energy.price <= 0) {
+							continue;
+						}
+						
+						for (var m = 0; m < 12; m++) {
+							data[1][i][m] = data[1][i][m] * parseFloat(meters[i].energy.price);	
+							sum += data[1][i][m];
+						}
+						
+			    		total.push({
+			    			name : meters[i].energy.title,
+							color:meters[i].energy.color,
+							y:sum});
+						months_series.push({
+					       			type:'column',
+									name : meters[i].energy.title,
+									data : data[1][i],
+									color:meters[i].energy.color,
+									tooltip: {
+										valueDecimals: 2,
+					                    valueSuffix: '€',
+					                    useHTML:true,
+					                    shared:true,
+					                }
+						});
+						
+					};
+					yAxis = [
+				               
+				               {
+				            	   labels: {
+				                       formatter: function() {
+				                           return this.value + '€';
+				                       },
+				                       useHTML:true,
+				                       style: {
+				                           color: '#555555'
+				                       },
+				                   },
+				                   title: {
+				                       text: 'Cost',
+				                       
+				                   }
+				               	
+				            	}];
+				} else {
+					data = year_data;
+					
+					months_series = [
+						{% for m in power_meters %}
+							
+			             {
+			       			type:'column',
+							name : '{{m.energy.title}}',
+							data : data[1][{{forloop.counter0}}],
+							color:'{{m.energy.color}}',
+							tooltip: {
+								valueDecimals: 2,
+			                    valueSuffix: ' {{m.energy.unit|safe}}'.replace('&deg;','°'),
+			                    useHTML:true,
+			                    shared:true,
+			                }
+						}{% if not forloop.last %},{% endif %}
+						{% endfor %}
+					]
+					var total = new Array();
+				    {% for m in power_meters %}
+			    		var sum = 0;
+			    		var i = {{forloop.counter0}};
+			    		for (var m = 0; m < 12; m++) sum += parseFloat(data[1][i][m]);
+			    		total.push({
+			    			name : '{{m.energy.title}}',
+							color:'{{m.energy.color}}',
+							y:sum,
+							
+			    		});
+			    	{% endfor %}
+				}
+				
+	    		var year=$('#year');	    		
+	    		var year_tot=$('#year_tot');	    		
+	    		new Highcharts.Chart({
+			      	chart: {
+			      		renderTo: 'year',
+			      		backgroundColor:'rgba(255,255,255,0.7)'
+			      	},
+			        title: {
+			            text: 'Past months '+(mode=='price'?'expenses':'consumption'),
+			            style: {color:'#1A5213',fontSize: '16px',fontWeight:'bold'}
+			        },
+			        legend: {
+			        	
+			        	enabled:true
+			        },
+			        yAxis:yAxis,
+			        tooltip: {
+		                shared: true,
+		                borderColor:'#1A5213',
+		                
+		            },
+			               
+		            xAxis:{
+		            	categories:data[0]	
+		            },
+			        series : months_series
+	
+			    });//End higharts (year)			    
+			    
+			    new Highcharts.Chart({
+			      	chart: {
+			      		renderTo: 'year_tot',
+			      		plotBackgroundColor: null,
+			      	},
+			        title: {
+			            text: 'Past year '+(mode=='price'?'expenses':'consumption'),
+			            style: {color:'#1A5213',fontSize: '16px',fontWeight:'bold'}
+			        },
+			        tooltip: {
+		                shared: true,
+		                borderColor:'#1A5213',
+		            },
+			        series : [
+			             {
+			            	type:'pie',
+							
+							data : total,
+							name :'Year consumption',
+							tooltip: {
+								valueDecimals: 2,
+			                    valueSuffix: tot_unit,
+			                    useHTML:true,
+			                    shared:true,
+			                }
+							
+						}
+						
+					]
+	
+			    });//End higharts (total)
+	    	}
+		
+		
+		
+			$.getJSON({% if meter_mode %}'/data/meter_{{meters.0.hash}}/all/'{% else %}'/data/house_{{request.session.house}}/all/'{% endif %}, function(data) {
+				var overall=$('#overall');
+			    overall.highcharts('StockChart',{
+			      	chart: {
+			      		type:'spline',
+			      		backgroundColor:'rgba(255,255,255,0.7)'
+			      	},
+			        title: {
+			            text: {% if meter_mode %}'{{meters.0.energy.title|title}} daily readings evolution'{% else %}'Overall daily readings evolution'{% endif %},
+			            style: {color:'#1A5213',fontSize: '16px',fontWeight:'bold'}
+			        },
+			        legend: {
+			        	
+			        	enabled:true,
+			        	floating:true
+			        },
+			        rangeSelector: {
+			        	selected : 1,
+			        	buttonTheme: {
+				    		fill: 'none',
+				    		stroke: 'none',
+				    		border:'none',
+				    		style: {
+				    			color: '#1A5213',
+				    			fontWeight: 'bold'
+				    		},
+				    		states: {
+				    			hover: {
+				    				fill: 'white',
+				    				stroke:'#1A5213',
+				    			},
+				    			select: {
+				    				style: {
+				    					color: 'white',
+				    				},
+				    				stroke: '#1A5213',
+				    				fill:'#1A5213',
+				    				
+				    			}
+				    		}
+				    	},
+			        },
+			        tooltip: {
+		                shared: true,
+		                borderColor:'#1A5213',
+		            },
+		            navigator: {
+	                    series: {
+							type: 'areaspline',
+							color: 'rgb(60,150,40)',
+							fillOpacity: 0.4,
+							dataGrouping: {
+								smoothed: true
+							},
+							lineWidth: 1,
+							marker: {
+								enabled: false
+							},
+							shadow: false
+						},
+						bottom:0,
+					    enabled:true                
+		            },
+			        
+			        yAxis:[
+			               {% for m in meters %}
+			               
+			               {
+			            	   labels: {
+			                       formatter: function() {
+			                           return this.value +' {{m.energy.unit|safe}}';
+			                       },
+			                       useHTML:true,
+			                       style: {
+			                           color: '#555555'
+			                       },
+			                       x:{% cycle '45' '-45' %},
+			                   },
+			                   title: {
+			                       text: '{{m.energy.title}}',
+			                       style: {
+			                           color: '{{m.energy.color}}'
+			                       },
+			                   margin: 50 ,
+			                   },
+			               	
+			                   opposite:{% cycle 'true' 'false' %} 
+			            	}{% if not forloop.last %},{% endif %}
+			            	
+			               {% endfor %}],
+			               
+			        series : [
+						{% for m in meters %}     
+			             {
+			       
+							name : '{{m.energy.title}}',
+							data : data[{{forloop.counter0}}],
+							color:'{{m.energy.color}}',
+							tooltip: {
+								valueDecimals: 2,
+			                    valueSuffix: ' {{m.energy.unit|safe}}'.replace('&deg;','°'),
+			                    useHTML:true,
+			                },
+			                marker:{
+			                	enabled:data[{{forloop.counter0}}].length < 2,
+			                },
+				        	yAxis: {{forloop.counter0}}
+						}{% if not forloop.last %},{% endif %}
+						{% endfor %}
+						
+					],
+					xAxis:[ {ordinal: false
+		            }],
+			    });
+			    chart = overall.highcharts();
+			    for (var i = 0; i < chart.yAxis.length; i++) {
+					if (chart.yAxis[i].getExtremes().min < 0 && chart.yAxis[i].getExtremes().dataMin >= 0) {
+						chart.yAxis[i].setExtremes(0,null);
+					}
+			    }
+			    $.getJSON('/data/house_{{request.session.house}}/year/', function(data) {
+			    	year_data = data;
+			    	year('price');
+			    	
+			    });//End $.getjson (year)
+			    
+			   
+			});//End $.getjson (all)
+
+		</script>
+		
+	
+{% endblock %}

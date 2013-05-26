@@ -1,0 +1,286 @@
+{% extends "base/base.html" %}
+
+{% block title %}Statistics{% endblock %}
+
+{% block content %}
+{% load compressed %}
+{% compressed_css 'historic' %}
+
+<h1>Statistics</h1>
+<script type="text/javascript" src="/static/js/highstock.js"></script>
+		<div id="meter"></div>
+		<div id="meter_cons"></div>
+		<script type="text/javascript">
+			Highcharts.setOptions({global:{useUTC:false}});
+			$.getJSON('/data/meter_{{meter.hash}}/instant/', function(data) {
+				var meter = $('#meter');
+			    meter.highcharts('StockChart',{
+			      	chart: {
+			      		type:'spline',
+			      		backgroundColor:'rgba(255,255,255,0.7)'
+			      	},
+			        title: {
+			            text: '{{meter.energy.title}} instant consumption',
+			            style: {color:'#1A5213',fontSize: '16px',fontWeight:'bold'}
+			        },
+			        legend: {
+			        	
+			        	enabled:true,
+			        	floating:true
+			        },
+			        rangeSelector: {
+			        	selected : 1,
+			        	buttonTheme: {
+				    		fill: 'none',
+				    		stroke: 'none',
+				    		border:'none',
+				    		style: {
+				    			color: '#1A5213',
+				    			fontWeight: 'bold'
+				    		},
+				    		states: {
+				    			hover: {
+				    				fill: 'white',
+				    				stroke:'#1A5213',
+				    			},
+				    			select: {
+				    				style: {
+				    					color: 'white',
+				    				},
+				    				stroke: '#1A5213',
+				    				fill:'#1A5213',
+				    				
+				    			}
+				    		}
+				    	},
+			        },
+			        tooltip: {
+		                shared: true,
+		                borderColor:'#1A5213',
+		            },
+		            navigator: {
+
+                    series: {
+						type: 'areaspline',
+						color: 'rgb(60,150,40)',
+						fillOpacity: 0.4,
+						dataGrouping: {
+							smoothed: true,
+							
+						},
+						lineWidth: 1,
+						marker: {
+							enabled: false
+						},
+						shadow: false
+					}
+					                 ,
+					                 enabled:true
+                
+		            },
+		            plotOptions: {
+		                spline: {
+		                    lineWidth: 3,
+		                    states: {
+		                        hover: {
+		                            lineWidth: 3
+		                        }
+		                    },
+		                    marker: {
+		                        enabled: false
+		                    },
+		              
+		              
+		                }
+		            },
+		            xAxis:[ {ordinal: false
+		            }],
+			        yAxis:[
+							{
+			            	   labels: {
+			                       formatter: function() {
+			                           return this.value +' {{meter.energy.unit_instant|safe}}';
+			                       },
+			                       useHTML:true,
+			                       style: {
+			                           color: '#555555'
+			                       },
+			                       x:-45,
+			                   },
+			                   title: {
+			                       text: '{{meter.energy.title}}',
+			                       style: {
+			                           color: '{{meter.energy.color}}'
+			                       },
+			                   margin: 50 ,
+			                   
+			                   },
+			            	},			            	
+			  			],			               
+			        series : [
+						
+			             {
+			       
+							name : '{{meter.energy.title}}',
+							data : data,
+							color:'{{meter.energy.color}}',
+							tooltip: {
+								valueDecimals: 2,
+			                    valueSuffix: ' {{meter.energy.unit_instant|safe}}'.replace('&deg;','°'),
+			                    useHTML:true,
+			                },
+			                marker:{
+			                	enabled:data.length < 2,
+			                },
+						},
+						
+						
+					]
+			    });
+			    chart = meter.highcharts();
+			    for (var i = 0; i < chart.yAxis.length; i++) {
+			    	console.log(chart.yAxis[i].getExtremes());
+					if (chart.yAxis[i].getExtremes().min <= 0 && chart.yAxis[i].getExtremes().dataMin >= 0) {
+						chart.yAxis[i].setExtremes(0,null);
+					}
+			    }
+			    
+			    $.getJSON('/data/meter_{{meter.hash}}/consumption/', function(data) {
+					var meter = $('#meter_cons');
+				    meter.highcharts('StockChart',{
+				      	chart: {
+				      		type:'spline',
+				      		backgroundColor:'rgba(255,255,255,0.7)'
+				      	},
+				        title: {
+				            text: '{{meter.energy.title}} daily consumption',
+				            style: {color:'#1A5213',fontSize: '16px',fontWeight:'bold'}
+				        },
+				        legend: {
+				        	
+				        	enabled:true,
+				        	floating:true
+				        },
+				        rangeSelector: {
+				        	selected : 1,
+				        	buttonTheme: {
+					    		fill: 'none',
+					    		stroke: 'none',
+					    		border:'none',
+					    		style: {
+					    			color: '#1A5213',
+					    			fontWeight: 'bold'
+					    		},
+					    		states: {
+					    			hover: {
+					    				fill: 'white',
+					    				stroke:'#1A5213',
+					    			},
+					    			select: {
+					    				style: {
+					    					color: 'white',
+					    				},
+					    				stroke: '#1A5213',
+					    				fill:'#1A5213',
+					    				
+					    			}
+					    		}
+					    	},
+				        },
+				        tooltip: {
+			                shared: true,
+			                borderColor:'#1A5213',
+			            },
+			            navigator: {
+
+	                    series: {
+							type: 'areaspline',
+							color: 'rgb(60,150,40)',
+							fillOpacity: 0.4,
+							dataGrouping: {
+								smoothed: true,
+								
+							},
+							lineWidth: 1,
+							marker: {
+								enabled: false
+							},
+							shadow: false
+						}
+						                 ,
+						                 enabled:true
+	                
+			            },
+			            plotOptions: {
+			                spline: {
+			                    lineWidth: 3,
+			                    states: {
+			                        hover: {
+			                            lineWidth: 3
+			                        }
+			                    },
+			                    marker: {
+			                        enabled: true
+			                    },
+			              
+			              
+			                }
+			            },
+			            xAxis:[ {ordinal: false
+			            }],
+				        yAxis:[
+								{
+				            	   labels: {
+				                       formatter: function() {
+				                           return this.value +' {{meter.energy.unit|safe}}';
+				                       },
+				                       useHTML:true,
+				                       style: {
+				                           color: '#555555'
+				                       },
+				                       x:-45,
+				                   },
+				                   title: {
+				                       text: '{{meter.energy.title}}',
+				                       style: {
+				                           color: '{{meter.energy.color}}'
+				                       },
+				                   margin: 50 ,
+				                   
+				                   },
+				            	},			            	
+				  			],			               
+				        series : [
+							
+				             {
+				       
+								name : '{{meter.energy.title}}',
+								data : data[0],
+								color:'{{meter.energy.color}}',
+								tooltip: {
+									valueDecimals: 2,
+				                    valueSuffix: ' {{meter.energy.unit|safe}}'.replace('&deg;','°'),
+				                    useHTML:true,
+				                },
+				                marker:{
+				                	enabled:data[0].length < 2,
+				                },
+							},
+							
+							
+						]
+				    });
+				    chart = meter.highcharts();
+				    for (var i = 0; i < chart.yAxis.length; i++) {
+				    	console.log(chart.yAxis[i].getExtremes());
+						if (chart.yAxis[i].getExtremes().min <= 0 && chart.yAxis[i].getExtremes().dataMin >= 0) {
+							chart.yAxis[i].setExtremes(0,null);
+						}
+				    }
+			    });
+			});
+
+		</script>
+		
+	
+{% endblock %}

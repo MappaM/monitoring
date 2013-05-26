@@ -1,0 +1,107 @@
+{% extends 'builder/stage_plan.html' %}
+{% block plan_tool %}	
+	
+	<div id="meter_chooser">
+		<input type="hidden" value="meter" name="tool" id="tool" />
+		<ul id="meter_menu">
+			<li class="meter meter_drop" id="meter_deleter"><img src="/static/img/symbols/remove.png" /></li>
+		</ul>
+		<div id="wall_error" style="" class="form_error"></div>
+	</div>	
+{% endblock %}
+{% block plan_footer %}
+<script type="text/javascript">
+	
+		var grid_precision = 2;
+		//Retrieving list of all energies
+		var energies = jsonStripModel({{energies|safe}});
+		
+		function save(callback) {
+			plan.save_meters(callback,'{{house_id}}','{{csrf_token}}');
+		}
+		
+		function grid_click(e) {
+			
+		}
+		
+
+		function createMeter(plan,meter,position,meter_id) {
+			var rpos = plan.renderer.getPosition(position);
+			var imgcontent = $('<div class="content"></div>');
+			imgcontent.append(meter.energy.getMeterImage(plan.onemeter * 1.2,plan.onemeter * 1.2));
+			var m = $('<div class="plan_meter meter_info'
+					+ ((meter.appliance_link === null) ? ' meter_global' : '')
+					+ '" style="width:' + (plan.onemeter * 1.9) + 'px;height:'
+					+ (plan.onemeter * 1.9) + 'px;font-size:'
+					+ Math.min(14, plan.onemeter * 0.2) + 'px;"><div class="title">' + meter.hash
+					+ '</div></div>');
+			m.append(imgcontent);
+			plan.canvas.parent().append(m);
+			m.css('left', rpos.x - plan.onemeter * 0.95 + 'px');
+			m.css('top', rpos.y - plan.onemeter * 0.95 + 'px');
+			m.data('meter',meter);
+			m.draggable({
+				containment : plan.canvas.parent().parent(),
+				handle : 'div:last',
+				zIndex : 500,
+				distance : 5,
+				opacity : 0.9,
+				revert : "invalid",
+			});
+		}
+		
+		//Retrieving list of consumable energies used in the house, and all state energies
+		var energies_used = jsonStripModel({{energies_used|safe}});
+		
+		var meters = jsonStripModel({{meters|safe}});		
+		var meter_modes = {{meter_modes|safe}};
+		
+		
+		
+		$(document).ready(function(){
+			//Creating meter deleter
+			$('#meter_deleter').droppable({
+			drop : function(event, ui) {
+					var m = ui.draggable.data('meter');	
+					meters.removeEquals(m);
+					refreshMeters(plan);
+				},			
+			accept : '.plan_meter',
+			hoverClass : 'meter_hover',
+			activeClass : 'meter_active',
+			});
+			
+			
+			
+			function reloadMeters(plan) {
+				if (plan.walls == undefined) return;
+				createDropables(plan);
+				refreshMeters(plan);
+			}	
+			
+			function init() {			
+				$(window).resize(function(){reloadMeters(plan)});
+				plan.events.register('applianceLoaded',reloadMeters);
+				plan.events.register('resized',reloadMeters);
+				plan.createMeter = createMeter;
+				plan.meterSize = 2;
+				initialiseDraggableMeter(energies_used);
+			}
+			if (plan == undefined)
+				$(document).ready(init);
+			else
+				init();
+			var scrolled= false;
+			
+		});
+		</script>
+	<div style="clear:both">
+		<a href="javascript:save(function(){location.href='/builder/stage6/';});" class="form_btn builder_btn_prev">&nbsp;</a>
+		<a href="javascript:save(function(){location.href='/consumption/';});" class="form_btn builder_btn_next">&nbsp;</a>
+	</div>
+	{% load compressed %}
+	{% compressed_js 'plan_appliance' %}
+	{% compressed_js 'plan_meter' %}
+	
+	
+{% endblock %}

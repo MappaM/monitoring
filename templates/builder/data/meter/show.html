@@ -1,0 +1,11 @@
+{% load mathfilters %}
+<div style="text-align:center;height:82px;margin:auto;width:{{ meters|length|mul:124 }}px;">
+{% for meter in meters %}
+	<div style="width:120px;float:left;height:80px;border:1px black solid;margin:1px;">
+	{{ meter.get_type_display }}<br />
+	{{ meter.get_mode_display }}<br />
+	Hash : {{ meter.secure }}<br />
+	<a href="javascript:deleteMeter({{meter.id}});" title="Remove meter">Remove</a>
+	</div>
+{% endfor %}
+</div>

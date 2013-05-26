@@ -1,0 +1,49 @@
+<ul id="leftmenu">
+	<li id="menu_consumption" class="{% if page == "consumption" %}active{%endif%}{% if builder_only %} off{%endif%}"  onclick="{% if not builder_only %}menu('consumption');{%endif%}">
+		<a href="/consumption/" title="Consumption">Consumption</a>
+	</li>
+	{% if perms.alert.change_alert %}
+	<li id="menu_alert" class="{% if page == "alert" %}active{%endif%}{% if builder_only %} off{%endif%}"  onclick="{% if not builder_only %}menu('alert');{%endif%}">
+		<a href="/alert/" title="Alert">Alert</a>
+	</li>
+	{% endif %}
+	<li id="menu_historic" class="{% if page == "historic" %}active{%endif%}{% if builder_only %} off{%endif%}"  onclick="{% if not builder_only %}menu('historic');{%endif%}">
+		<a href="/historic/" title="Historic">Historic</a>
+	</li>
+	{% comment %}
+	<li id="menu_upgrade" class="{% if page == "upgrade" %}active{%endif%}{% if builder_only %} off{%endif%}" onclick="{% if not builder_only %}menu('upgrade');{%endif%}">
+		<a href="/upgrade/" title="Upgrade">Upgrade</a>
+	</li>
+	{% endcomment %}
+	{% if perms.builder.edit_house %}
+	<li id="menu_builder" class="{% if page == "builder" %}active{%endif%}" onclick="menu('builder');">
+		<a href="/builder/" title="Builder">Builder</a>
+	</li>
+	{% endif %}
+</ul>
+{% if perms.builder.view_house %}
+<div id="menu_house">
+<select id="house_chooser"
+	onchange="javascript:houseChoose($(this).val());">
+	<option value="-1">---</option>
+	<option value="">New</option>
+	{% for house in houses %}
+	<option value="{{house.id}}" {% if house.id == request.session.house %}selected="selected"{% endif %}>{{house.name}}</option>
+	{% endfor %}
+</select>
+</div>
+{% endif %}
+<ul id="rightmenu">
+	<li id="menu_settings" class="{% if page == "settings" %}active{%endif%}" onclick="menu('settings');">
+		<a href="/settings/" title="Settings">Settings</a>
+	</li>
+</ul>
+
+{% if 'MSIE' in request.META.HTTP_USER_AGENT %}
+<!--[if eq IE 8]>
+	<div class="ieold" style="font-style:italic;font-size:0.8em;">Your navigator is old and the interface cannot be rendered at its best, you should <a href="http://windows.microsoft.com/en-my/windows-vista/update-internet-explorer">update it</a>.</div>	
+<![endif]-->
+<!--[if lte IE 7]>
+	<div class="ieold" style="color:red;">Your navigator is old and the interface cannot be rendered at its best, you should <a href="http://windows.microsoft.com/en-my/windows-vista/update-internet-explorer">update it</a>.</div>
+<![endif]-->
+{% endif %}

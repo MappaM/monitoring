@@ -1,0 +1,235 @@
+@import url(http://fonts.googleapis.com/css?family=Noto+Sans:400,700,400italic|Lobster);
+
+body {
+	padding:0;
+	margin:0;
+	font-family:'Noto Sans',sans-serif;
+	font-size:14px;
+	min-width:780px;
+}
+
+h1 {
+	font-family: 'Lobster', cursive;
+	text-align:center;
+	font-size:34px;
+	margin:0 0 20px 0;
+	padding:10px;
+	color:rgb(250,250,250);
+	background-color:rgb(20,20,20);
+	box-shadow:0px 0px 10px #000000;
+	display:block;
+}
+
+h2 {
+	font-family: 'Lobster', cursive;
+	text-align:center;
+	font-size:22px;
+}
+
+input,select,textarea {
+	font-family:helvetica,sans-serif;
+	font-size:14px;
+}
+
+#menubar {
+	height:154px;
+	background-image:url('/static/img/base/menu/background.png');
+	clear:both;
+	z-index:200;
+	position:absolute;
+	width:100%;
+	top:0;
+	min-width:780px;
+}
+
+a img {
+	border:none;
+}
+
+#menubar .logolink {
+	float:left;
+	width:258px;
+	display:block;
+	text-decoration:none;
+	outline:none;
+}
+#menubar img {		
+	width:258px;
+}
+
+#menubar ul {
+	float:left;
+	padding:24px 4px 0 4px;
+	margin:0;
+	list-style-type:none;
+}
+
+#menubar li {
+	width:64px;
+	height:64px;
+	float:left;
+	border:1px #777777 solid;
+	border-radius:5px;
+	margin:4px;
+	text-align:center;
+	background-color:#eeeeee;
+}
+
+
+#menubar li:hover {
+	cursor: pointer;
+	background-color:#f9f9f9;
+}
+
+#menubar li.off:hover {  /*For old browser which doesn't understand css3 selector, we cannot make these two in one with :not(.off)*/
+	cursor: auto;
+	background-color:#eeeeee !important;
+}
+
+#menubar  #rightmenu {
+	position:absolute;
+	right:24px;
+	top:0;
+}
+
+#menubar ul li:last-child{
+	float:right;
+}
+
+#menu_house {
+	float:left;
+	padding-top:24px;
+}
+
+#menu_house select {
+	margin-top:20px;	
+
+}
+
+#content {
+	margin-top:154px;
+	padding:0px;	
+}
+
+form ul{
+	list-style-type: none;	
+	margin:none;
+	padding:none;
+	color:#2030A0;
+}
+
+.form_error {
+	color:#2030A0;
+	font-style:italic;
+}
+
+#menubar li a {
+	text-decoration:none;
+	display:none;
+}
+
+#menubar li {
+	cursor:pointer;
+}
+#menubar #menu_historic {
+	background-image:url('/static/img/base/menu/historic.png');
+}
+#menubar #menu_historic.off {
+	background-image:url('/static/img/base/menu/historic_off.png');
+	cursor:auto;
+}
+#menubar #menu_historic.active {
+	background-color:rgba(210,248,155,1);
+}
+#menubar #menu_settings {
+	background-image:url('/static/img/base/menu/settings.png');
+}
+#menubar #menu_settings.active {
+	background-color:rgba(190,190,190,1);
+}
+#menubar #menu_upgrade {
+	background-image:url('/static/img/base/menu/upgrade.png');
+}
+#menubar #menu_upgrade.off {
+	background-image:url('/static/img/base/menu/upgrade_off.png');
+	cursor:auto;
+}
+#menubar #menu_upgrade.active {
+	background-color:rgba(210,248,155,1);
+}
+#menubar #menu_builder {
+	background-image:url('/static/img/base/menu/builder.png');
+}
+#menubar #menu_builder.active {
+	background-color:rgba(255,210,220,1);
+}
+#menubar #menu_alert {
+	background-image:url('/static/img/base/menu/alert.png');
+}
+#menubar #menu_alert.off {
+	cursor:auto;
+	background-image:url('/static/img/base/menu/alert_off.png');
+}
+#menubar #menu_alert.active {
+	background-color:rgba(190,220,252,1);
+}
+#menubar #menu_consumption {
+	background-image:url('/static/img/base/menu/consumption.png');
+}
+#menubar #menu_consumption.off {
+	cursor:auto;
+	background-image:url('/static/img/base/menu/consumption_off.png');
+}
+#menubar #menu_consumption.active {
+	background-color:rgba(200,180,250,1);
+}
+#menubar li.off {
+	opacity:0.5;
+}
+
+.overlay {
+	background-color:rgba(0,0,0,0.5);
+	position:fixed;
+	width:100%;
+	text-align:center;
+	z-index:999;
+	top:0;
+	left:0;
+}
+
+.formTable {
+	margin:auto;
+	border-collapse: collapse;
+}
+
+.formTable tr td:first-child{
+	text-align:right;
+	padding-right:10px;
+	min-width:220px;
+}
+
+.formTable tr td:last-child{
+	text-align:left;
+	padding-left:10px;
+	min-width:220px;
+}
+
+input,select,textarea,.form_btn {
+	border:1px rgba(100,100,100,0.2) solid;
+	border-radius:2px;
+	margin:2px;
+	padding:2px;
+	background-color:rgba(255,255,255,0.8);
+}
+
+.formTable tr td input,select,textarea,.form_btn{
+	min-width:160px;
+	box-sizing:border-box;	
+}
+
+.ieold {
+	position:absolute;
+	top:100px;
+	left:240px;	
+}
+

@@ -1,0 +1,163 @@
+{% extends 'builder/stage.html' %}
+
+{% block stage %}
+	<h1>Builder<div style="font-size:18px;font-family:'Noto Sans',sans-serif;">Cellar, floors and roof</div></h1>
+	<div class="stage_content">
+	<div id="floor_error" class="form_error"></div>
+	<div id="floor_elements">
+		<h2>Add elements</h2>
+		<div id="floor_addzone">
+			{% for floor in floor_types %}
+			<input type="button" id="addnormal" onclick="addFloor('{{ floor.0 }}');" value="Add {{ floor.1 }}" />
+			{% endfor %}	
+		</div>
+	</div>
+	<div id="floor_drawings">
+		<h2>Drawings of your house</h2>
+		<div id="floor_show"></div>
+	</div>
+	<script type="text/javascript" src="/static/js/builder/builder.js"></script>
+	<script type="text/javascript">
+		var floors = new Array();
+		var editable = true;
+		function removeFloor(i) {
+			floors.remove(i);
+			refreshFloorList();
+		}
+		function refreshFloorList() {
+			$('#floor_show').html('');
+			for (var i=0; i<floors.length; i++) {
+				var inp = '';
+				if (editable)
+					inp = '<div class="floor_height">Height : <input type="text" value="' + floors[i].height + '" id="floor_' + i + '" onchange="javascript:change(' + i + ');" />m <a href="javascript:removeFloor(' + i  + ');">[Remove]</a></div>';
+				else {
+					
+				}
+				if (floors[i].floor.contains('ROOF')) {
+					if (floors[i].floor == 'ROOF_ATTIC')
+						s = 0;
+					else 
+						s = 32;
+					$('#floor_show').append('<div class="floor"><canvas  width="202" height="' + (50 + s) + '" class="floor_draw floor_' + floors[i].floor.toLowerCase() + '" id="floor_roof"></canvas>' + inp + '</div>');
+					
+						var c=document.getElementById("floor_roof");
+						if (c.getContext == undefined)
+							G_vmlCanvasManager.initElement(c);
+						var ctx=c.getContext("2d");
+						ctx.moveTo(0,50);
+						ctx.lineTo(101,0);
+						ctx.lineTo(202,50);
+						ctx.lineTo(202,50 + s);
+						ctx.lineTo(0,50 + s);
+						ctx.lineTo(0,50);
+						ctx.stroke();
+						
+				} else
+					$('#floor_show').append('<div class="floor"><div class="floor_draw floor_' + floors[i].floor.toLowerCase() + '">&nbsp;</div>'  + inp + '</div>');
+			}
+			if ((('{{house.type}}'=='FLAT')&&!contains(floors,'FLOOR')) || (('{{house.type}}'!='FLAT')&&!(contains(floors,'ROOF') && contains(floors,'FLOOR')))) {
+				$('#gonext_error').html('You need at least one floor and one roof !');
+				$('#gonext').hide();
+			} else {
+				$('#gonext_error').html('');
+				$('#gonext').show();
+			}
+			
+		}
+		
+		/**
+		 * Add a new floor in the stack if it can reveive it.
+		 */
+		function addFloor(type) {
+			if (type.contains('CELLAR') && contains(floors,'CELLAR')) {
+				$('#floor_error').html('Your house can only have one cellar');
+				return;
+			}
+			if ((type.contains('CELLAR') && contains(floors,'CRAWL_SPACE')) || (type.contains('CRAWL_SPACE') && contains(floors,'CELLAR'))) {
+				$('#floor_error').html('You cannot have a cellar and a crawl space');
+				return;
+			}
+			if (type.contains('SLAB') && contains(floors,'SLAB')) {
+				$('#floor_error').html('Your house can only have one slab');
+				return;
+			}
+			if (type.contains('ROOF') && contains(floors,'ROOF')) {
+				$('#floor_error').html('Your house can only have one roof');
+				return;
+			}
+			
+			if (type == 'ROOF_ATTIC') {
+				floors.reverse();
+				floors.push(new Floor(0,2.5,type));
+				floors.reverse();
+			} else if (type.contains('ROOF_LIVING')) {
+				floors.reverse();
+				floors.push(new Floor(0,3,type));
+				floors.reverse();
+			} else if (type.contains('SLAB')) {
+				floors.push(new Floor(0,0.2,type));
+			} else if (type.contains('CELLAR')) {
+				var n = 0;
+				if (floors.length > 0 && (floors[floors.length - 1].floor == 'SLAB' || floors[floors.length - 1].floor == 'CRAWL_SPACE'))
+					n+=1;
+				addFloorAt(floors.length - n, new Floor(0,1.8,type));
+			} else if (type.contains('FLOOR')){				
+				var n = 0;
+				if (floors.length > 0 && (floors[0].floor.contains('ROOF')))
+					n+=1;
+				addFloorAt(n, new Floor(0,2.4,type));				
+			} else if (type.contains('CRAWL')) {
+				var n = 0;
+				if (floors.length > 0 && (floors[floors.length - 1].floor == 'SLAB' || floors[floors.length - 1].floor == 'CRAWL_SPACE'))
+					n+=1;
+				addFloorAt(floors.length - n, new Floor(0,0.8,type));
+			}
+			$('#floor_error').html('');
+			refreshFloorList();
+			
+			
+		}
+		
+		
+		function change (index) {
+			floors[index][1] = $('#floor_'+index).val();
+		}
+		
+		
+		function save(stage) {
+			var f = "n="+floors.length;
+			for (var i=0; i<floors.length; i++) {
+				f += "&i_t" + i + "=" + floors[i].floor;
+				f += "&i_h" + i + "=" + floors[i].height;
+				f += "&i_pk" + i + "=" + floors[i].pk;
+			}
+
+			f += '&csrfmiddlewaretoken={{ csrf_token }}';
+			
+			$.ajax({
+				  type: "POST",
+				  url: '/builder/data/house_{{house.pk}}/floors/save',
+				  data: f,
+				  success: function(v){window.location.href='/builder/stage'+stage+'/'},
+				  error:function(e){$('#gonext_error').html(e)},
+	
+				});
+		}
+		
+		$(document).ready(function(){
+			floors = jsonStripModel({{floors|safe}});  
+			
+			//If there is no floor currently, we add simple new floor
+			if (floors.length == 0)	
+				addFloor('FLOOR');			
+			refreshFloorList();
+		});
+	</script>
+	<div style="clear:both;">&nbsp;</div>
+	<div id="gonext_error" class="form_error"></div>
+	<div style="clear:both">
+		<a href="javascript:save(2);" class="form_btn builder_btn_prev">&nbsp;</a>
+		<a href="javascript:save(4);" class="form_btn builder_btn_next">&nbsp;</a>
+	</div>
+	</div>
+{% endblock %}

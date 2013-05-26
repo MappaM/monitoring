@@ -1,0 +1,133 @@
+{% extends 'builder/stage_plan.html' %}
+
+{% block plan_tool %}
+	<div style="float:left;background-color:#dcad61;width:200px;text-align:left;">
+		<input type="radio" name="tool" value="wall" onclick="plan.toolChanged()" id="tool" checked="checked"/> Wall builder<br />
+		<input type="radio" name="tool" value="eraser" onclick="plan.toolChanged()" id="tool"/> Wall eraser<br />
+	</div>
+	{% if request.user.get_profile.advanced %}
+	<div style="float:left;background-color:#cc9d51;width:300px;text-align:left;">
+		Wall size : <input type="text" id="wall_size" onchange="checkWall()" style="width:50px;" value="18"/>cm<br />
+		Insulating material size : <input type="text" id="insulating_size" onchange="checkWall()" value="10" style="width:50px;"/>cm
+		<div id="wall_error" style="" class="form_error"></div>
+	</div>
+	{% else %}
+		<input type="hidden" id="wall_size" value="{{house.get_default_wall_ext}}"/><input type="hidden" id="insulating_size" value="{{house.get_default_insulating_ext}}"/>
+	{% endif %}
+	<script type="text/javascript">
+		var grid_precision = 1;
+		
+		function checkWall() {
+			if (parseInt($('#wall_size').val()) < parseInt($('#insulating_size').val())) {
+				$('#wall_error').html('Insulating material size must be smaller than the wall size...');
+			} else {
+				$('#wall_error').html('');
+			}
+		}
+		
+		function setToolByKey(e) {
+			if (e.keyCode == 69)
+				$('#tool[value=eraser]').prop('checked',true);
+			else if (e.keyCode == 87)
+				$('#tool[value=wall]').prop('checked',true);
+			else return;
+			e.preventDefault();
+			plan.refresh();
+		}
+		
+		function grid_click(e) {			
+			if ($('#tool:checked').val() == 'wall') {
+				if (plan.start != null && plan.cursor.x == plan.start.x && plan.cursor.y == plan.start.y) {
+					plan.start = undefined;
+				} else if (plan.start == undefined) {
+					plan.start = plan.cursor;
+				} else {
+					//If we are in basic mode, we have to put the size of the internal walls to internal sizes 
+					{% if not request.user.get_profile.advanced %}
+						plan.labelize(plan.walls);
+						var wallCandidate = new Wall(plan.start,plan.cursor);
+						if (wallIsExternal(wallCandidate, plan))
+							plan.addWall(plan.start,plan.cursor,$('#wall_size').val() / 100,$('#insulating_size').val() / 100);	
+						else
+							plan.addWall(plan.start,plan.cursor,{{house.get_default_wall_int}} / 100.0,{{house.get_default_insulating_int}} / 100.0);
+						
+					{% else %}						
+						plan.addWall(plan.start,plan.cursor,$('#wall_size').val() / 100,$('#insulating_size').val() / 100);
+					{% endif %}	
+					plan.start = undefined;
+					
+				}
+			} else { //Eraser
+				plan.removeWallAt(plan.cursor);
+				plan.events.call('stateChanged',plan);
+			
+			}
+			plan.refresh();
+		}
+		
+		function save(callback) {				
+			if (plan.windows_changed)
+				plan.save_walls(function() {plan.save_windows(callback,'{{house_id}}','{{csrf_token}}');},'{{house_id}}','{{csrf_token}}');
+			else
+				plan.save_walls(callback,'{{house_id}}','{{csrf_token}}');
+		}
+		
+		function stateChanged(plan) {
+			if (getCurrentTool() == 'eraser') {
+				var ws = plan.getWallsAt(plan.cursor);
+				if (ws == undefined) return;
+				if (ws.length > 1) {
+					plan.displayAlert('Press N to put the window on another wall');
+				}				
+				var wall = ws[plan.items_next % ws.length];
+				if (wall != undefined) {
+					plan.tool = 'wall';
+					plan.toolColor = 'red';
+					plan.toolParams = wall;
+				} else {
+					plan.tool = 'circle';
+					plan.toolColor = 'red';
+				}
+					
+			} else {
+				plan.tool = 'circle';
+				plan.toolColor = 'blue';
+			}	
+		}
+		
+		function copyWalls(plan) {
+			if (plan.backfloor_id != undefined && plan.showBackWalls)
+				$.ajax({url: '/builder/data/floor_'+ plan.backfloor_id +'/walls/get',
+					success: function(data){
+						plan.backwalls = jsonStripModel($.parseJSON(data));
+	
+						if (plan.walls.length == 0 && plan.backwalls.length > 0) {
+							plan.labelize(plan.backwalls);
+							for (var i=0; i<plan.backwalls.length; i++) {
+								var wall = plan.backwalls[i];
+	
+								if (wallIsExternal(wall,plan)) {
+									plan.walls.push(wall);
+								}
+							}
+						}
+						plan.refresh();						
+					}});
+			else	
+				plan.backwalls = new Array();
+		}
+		
+		$(document).ready(function(){
+			plan.events.register('stateChanged',stateChanged);
+			plan.events.register('wallLoaded',copyWalls);
+		});
+		
+	</script>
+{% endblock %}
+
+{% block plan_footer %}
+	<div style="clear:both">
+		<a href="javascript:save(function(){location.href='/builder/stage3/';});" class="form_btn builder_btn_prev">&nbsp;</a>
+		<a href="javascript:save(function(){location.href='/builder/stage5/';});" class="form_btn builder_btn_next">&nbsp;</a>
+	</div>
+{% endblock %}

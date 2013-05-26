@@ -1,0 +1,19 @@
+
+	{{ form.non_field_errors }}
+	{% csrf_token %}
+
+	{% for hidden in form.hidden_fields %}
+    {{ hidden }}
+    {% endfor %}
+
+	<table class="formTable">
+	{% if form.non_field_errors %}
+		<tr><td colspan="2">{{ form.non_field_errors }}</td></tr>
+	{% endif %}
+    {% for field in form.visible_fields %}
+        <tr class="fieldWrapper">
+            <td>{{ field.label_tag }} :</td><td>{{ field }}</td>
+        </tr>
+        {% if field.errors %}<tr><td colspan="2" style="text-align:center;">{{ field.errors }}</td>{% endif %}
+    {% endfor %}
+    </table>

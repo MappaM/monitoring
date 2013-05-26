@@ -1,0 +1,63 @@
+h1 {
+	background-color:rgb(20,45,10);
+	color: rgb(251,255,248);	
+}
+
+#content {
+	padding:0;
+	background-image: linear-gradient(top, rgb(126,194,100) 0%, rgb(225,245,215) 22%, rgb(250,253,247) 94%);
+	background-image: -o-linear-gradient(top, rgb(126,194,100) 0%, rgb(225,245,215) 22%, rgb(250,253,247) 94%);
+	background-image: -moz-linear-gradient(top, rgb(126,194,100) 0%, rgb(225,245,215) 22%, rgb(250,253,247) 94%);
+	background-image: -webkit-linear-gradient(top, rgb(126,194,100) 0%, rgb(225,245,215) 22%, rgb(250,253,247) 94%);
+	background-image: -ms-linear-gradient(top, rgb(126,194,100) 0%, rgb(225,245,215) 22%, rgb(250,253,247) 94%);
+	
+	background-image: -webkit-gradient(
+		linear,
+		left top,
+		left bottom,
+		color-stop(0, rgb(126,194,100)),
+		color-stop(0.22, rgb(225,245,215)),
+		color-stop(0.94, rgb(250,253,247))
+	);
+
+}
+
+#meters {
+	margin:10px;	
+}
+
+/*Style for buttons*/
+.historic_btn_consumption,.historic_btn_lhv,.historic_btn_price {
+	width:64px;
+	height:64px;
+	min-width:64px !important;
+	display:inline-block;	
+	background-repeat:no-repeat;
+	background-position:center center;
+	text-decoration:none;
+	background-color:rgb(180,240,140);
+	
+}
+
+.historic_btn_consumption:hover,.historic_btn_lhv:hover,.historic_btn_price:hover{
+	background-color:rgb(126,194,100);
+}
+
+.historic_btn_consumption:focus,.historic_btn_lhv:focus,.historic_btn_price:focus{
+	 border-color:rgb(20,45,10);
+	 outline:none;
+}
+
+.historic_btn_consumption:active,.historic_btn_lhv:active,.historic_btn_price:active{
+	background-color:rgb(120,220,110);
+}
+
+.historic_btn_consumption {
+	background-image:url('/static/img/historic/consumption.png') !important;
+}
+.historic_btn_lhv {
+	background-image:url('/static/img/historic/radiator.png') !important;
+}
+.historic_btn_price {
+	background-image:url('/static/img/historic/euro.png') !important;
+}

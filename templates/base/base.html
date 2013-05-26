@@ -1,0 +1,43 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
+<head>
+    <title>{% block title %}USE Monitoring{% endblock %}</title>
+    {% load compressed %}
+   	{% compressed_css 'base'%}
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="/static/js/excanvas.js"></script>
+    <script type="text/javascript" src="/static/js/canvas.text.js"></script>
+    <script type="text/javascript" src="/static/js/PIE.js"></script>
+    <script type="text/javascript">
+    	$(document).ready(function() {
+		    if (window.PIE) {
+		        $('li').each(function() {
+		            PIE.attach(this);
+		        });
+		      
+		        $('div').each(function() {
+		            PIE.attach(this);
+		        });
+
+		    }
+		});
+    </script>
+    <![endif]-->
+    <!--[if lt IE 9]><link rel="stylesheet" type="text/css" media="all" href="/static/css/ie.css" /><![endif]-->
+   	{% compressed_js 'global'%}
+</head>
+
+<body>
+    <div id="menubar">
+    	{% load staticfiles %}
+    	<a href="/" class="logolink"><img src="{% static '/static/img/base/menu/logo.png' %}" title="USE Monitoring" /></a>
+    	{% load menu_manager %}
+    	{% menu %}
+    </div>
+    
+    <div id="content">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

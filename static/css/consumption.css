@@ -1,0 +1,51 @@
+h1 {
+	background-color:rgb(70,60,105);
+	color: rgb(240,230,255);	
+}
+
+#content {
+	padding:0;	
+	background-image: linear-gradient(top, rgb(126,103,194) 0%, rgb(225,215,245) 22%, rgb(251,247,252) 94%);
+	background-image: -o-linear-gradient(top, rgb(126,103,194) 0%, rgb(225,215,245) 22%, rgb(251,247,252) 94%);
+	background-image: -moz-linear-gradient(top, rgb(126,103,194) 0%, rgb(225,215,245) 22%, rgb(251,247,252) 94%);
+	background-image: -webkit-linear-gradient(top, rgb(126,103,194) 0%, rgb(225,215,245) 22%, rgb(251,247,252) 94%);
+	background-image: -ms-linear-gradient(top, rgb(126,103,194) 0%, rgb(225,215,245) 22%, rgb(251,247,252) 94%);
+	background-image: -webkit-gradient(
+		linear,
+		left top,
+		left bottom,
+		color-stop(0, rgb(126,103,194)),
+		color-stop(0.22, rgb(225,215,245)),
+		color-stop(0.94, rgb(251,247,252))
+	);
+
+}
+
+#plans {
+	padding: 10px;
+	background-color : rgba(255,255,255,0.7);
+	border-radius:12px;
+	clear:both;
+	margin:10px;
+	overflow: hidden;
+	
+}
+
+.meter_info {
+
+	margin-top:3%;
+}
+
+.meter_info .title {
+	background-repeat:no-repeat;
+	background-position:left center,right center;
+}
+
+.meter_info .historic {
+	background-repeat:no-repeat;
+	background-position:right center;
+	width:20px;
+	height:100%;	
+	float:right;
+	cursor:pointer;
+}

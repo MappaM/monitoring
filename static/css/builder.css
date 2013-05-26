@@ -1,0 +1,377 @@
+/* Style relative to all stages of builder*/
+h1 {
+	background-color:rgb(99,14,57);
+	color: rgb(247,230,239);	
+}
+
+#content {
+	padding:0;
+	background-color: rgb(237,216,222); /*Old brower compatibility*/
+	background-image: linear-gradient(top, rgb(214,62,151) 0%, rgb(237,216,222) 22%, rgb(250,245,246) 94%);
+	background-image: -o-linear-gradient(top, rgb(214,62,151) 0%, rgb(237,216,222) 22%, rgb(250,245,246) 94%);
+	background-image: -moz-linear-gradient(top, rgb(214,62,151) 0%, rgb(237,216,222) 22%, rgb(250,245,246) 94%);
+	background-image: -webkit-linear-gradient(top, rgb(214,62,151) 0%, rgb(237,216,222) 22%, rgb(250,245,246) 94%);
+	background-image: -ms-linear-gradient(top, rgb(214,62,151) 0%, rgb(237,216,222) 22%, rgb(250,245,246) 94%);
+	
+	background-image: -webkit-gradient(
+		linear,
+		left top,
+		left bottom,
+		color-stop(0, rgb(214,62,151)),
+		color-stop(0.22, rgb(237,216,222)),
+		color-stop(0.94, rgb(250,245,246))
+	);
+
+}
+
+.stage_content {
+	position:relative;
+	background-color:rgb(253,249,251);
+	border-radius:14px;
+	margin:10px;
+	padding:14px;
+	min-width:680px;
+	overflow:hidden;
+}
+
+
+/*Css for buttons. Note: colors are in rgb then rgba for old browser (keeping rgb while not understanding rgba)*/
+#gonext {
+	min-width:100px;
+	margin-bottom:20px;
+	margin-top:10px;
+}
+
+.builder_btn_delete,.builder_btn_prev,.builder_btn_next,.builder_btn_add {
+	width:64px;
+	height:64px;
+	min-width:64px !important;
+	display:inline-block;	
+	background-repeat:no-repeat;
+	background-position:center center;
+	text-decoration:none;
+	background-color:rgb(230,230,230);
+	background-color:rgba(230,230,230,0.8);
+}
+
+.builder_btn_delete:hover,.builder_btn_prev:hover,.builder_btn_next:hover,.builder_btn_add:hover{
+	background-color:rgb(150,150,150);
+	background-color:rgba(150,150,150,0.7);
+}
+
+.builder_btn_delete:focus,.builder_btn_prev:focus,.builder_btn_next:focus,.builder_btn_add:focus{
+	 border-color:rgb(99,14,57);
+	 border-color:rgba(99,14,57,1);
+	 outline:none;
+}
+
+.builder_btn_delete:active,.builder_btn_prev:active,.builder_btn_next:active,.builder_btn_add:active{
+	background-color:rgb(100,100,100);
+	background-color:rgba(100,100,100,0.2);
+}
+
+.builder_btn_delete {
+	background-image:url('/static/img/builder/builder_delete.png') !important;
+}
+.builder_btn_prev {
+	background-image:url('/static/img/builder/builder_prev.png') !important;
+}
+.builder_btn_add {
+	background-image:url('/static/img/builder/builder_add.png') !important;
+}
+.builder_btn_next {
+	background-image:url('/static/img/builder/builder_next.png') !important;
+}
+
+/*Style for people management (stage 2)*/
+ 
+ #people_show {
+ 	 float:right;
+ 	 height:90px;
+ 	 margin:30px;
+ }
+ 
+ 
+.people_addzone {
+	margin:20px;
+	padding:10px;
+	height:100px;
+	float:left;
+	border:1px black dashed;	
+	
+}
+
+.people_addzone table {
+	float:left;
+}
+
+.people_addzone a {
+	margin-top:8px;
+	float:left;
+}
+
+/*Style relative to floor display (stage 3 particulary, but also floor selector of stage 4 to 7)*/
+#floor_drawings {
+	float:left;
+	width:50%;
+	text-align:center;
+}
+
+#floor_elements
+{
+	float:right;
+	width:50%;
+	text-align:center;
+}
+#floor_addzone {
+	width:200px;
+	margin:auto;
+	text-align:left;
+}
+
+#floor_addzone input {
+	width:200px;
+}
+#floor_show {
+	width:220px;
+	margin:auto;
+}
+
+.floor {
+	clear:left;	
+	height:60px;
+}
+.floor_draw  {
+	float:left;
+}
+
+
+.floor_floor {
+	margin-top:5px;
+	width:200px;
+	height:50px;
+	border:1px black solid;
+}
+
+.floor_crawl_space {
+    margin-top:20px;
+	width:200px;
+	height:20px;
+	border:1px black solid;
+	background-color:grey;
+}
+
+.floor_cellar {
+	width:200px;
+	margin-top:10px;
+	height:40px;
+	border:1px black dashed;
+}
+
+.floor_roof_attic,.floor_roof_living {
+
+}
+
+.floor_slab {
+	width:200px;
+	margin-top:20px;
+	height:10px;
+	background-color:black;
+	border:1px black solid;
+}
+
+.floor_height {
+	padding-top:15px;
+	float:left;
+	margin-left:4px;
+}
+
+.floor_height input {
+	width:50px;
+}
+
+/*Style relative to the stage 4 to 7, mainly relative to the plan, but not used in other applications using the plan*/
+#builder_tools  div {
+	margin:10px;
+	height:115px;
+	padding:9px;
+	border-radius : 3px;
+	
+}
+
+#builder_tools {
+	font-family: Arial;
+	font-size:11px;
+	height:153px;
+}
+
+ .plan_floor_show {
+	width:120px !important;
+	
+	float:left;background-color:#ed71cc;text-align:center;
+}
+
+/*Style for appliances (stage 6), again, only the building-related part*/
+#appliance_menu {
+	margin:0 0 8px 0;
+	padding:0;
+	list-style-type: none;
+	float:left;
+	height:25px;
+}
+
+#appliance_menu li {
+	float:left;
+	width:80px;
+	margin:0px;
+	padding:8px;
+	text-align:center;
+	background-color:#dd4422;
+	
+}
+
+#appliance_menu .active {
+	background-color:#aa2a1a;
+}
+#appliance_menu .modifs {
+	background-color:#5432dd ;
+}
+
+#appliance_menu .modifs.active {
+	background-color:#22128a !important;
+}
+
+
+#appliance_chooser a {
+	color: white;
+	text-decoration: none;
+}
+
+#appliance_chooser {
+	padding:0px !important;
+	background-color:#cc9d51;
+	text-align:left;
+	min-width:800px;
+	float:left;
+	height:129px !important;
+}
+
+#appliance_list {
+	clear : both;
+	margin:0 !important;
+	padding:0 8px 0 8px !important;
+	border-radius:0;
+	
+	overflow:auto;
+	height:84px;
+	list-style-type: none;
+}
+
+#appliance_list li {
+	width:68px;
+	height:68px;
+	text-align:center;
+	float:left;
+	background-color:white;
+	margin : 4px;
+	border-radius:6px;
+	padding:4px;
+}
+
+#appliance_list .active {
+	border : 2px #ff2211 solid;
+	padding:2px;
+	
+}
+
+
+/*Style relative to the positionement of meter (stage 7)*/
+#meter_chooser a {
+	color: white;
+	text-decoration: none;
+}
+
+#meter_chooser {
+	padding:0px !important;
+	background-color:#cc9d51;
+	text-align:left;
+
+	float:left;
+	height:129px !important;
+}
+
+#meter_menu {
+	margin:0;
+	padding:6px;
+	list-style-type: none;
+	float:left;
+	/*height:25px;*/
+}
+
+.meter {
+	border : 1px #555555 dashed;
+	border-radius:500px;
+	text-align:center;
+	position:relative;
+}
+
+#meter_menu li {
+	float:left;
+	width:96px;
+	height:96px;
+	margin:8px;
+	padding:2px;
+	background-color:rgba(255,255,255,0.2);
+	text-align:center;
+	border-radius:51px;
+	
+}
+
+.meter_active {
+	
+	background-color:rgba(200,240,160,0.45) !important;
+}
+
+.meter_hover {
+	background-color:rgba(150,200,60,0.7) !important;
+}
+
+.meter_global img {
+	margin-top:4px;
+}
+
+.meter_info .content {
+	position:relative;	
+}
+
+.meter_drop img {
+	opacity:0.5;
+}
+.meter_appliance {
+	position:absolute;
+	z-index:100;
+}
+
+.mode_choice {
+	float:left;
+	width: 130px;
+	text-align:center;
+}
+.mode_choice .image {	
+	cursor:pointer;	
+	width:120px;
+	height:120px;
+	border-radius:120px;
+	background-color:white;
+	border : 2px #111111 solid;
+	margin-top:10px;
+}
+
+.mode_choice .image:hover {
+	border : 2px #224499 solid;
+}
+
+.mode_chooser {
+	width:390px;
+	color:white;
+}

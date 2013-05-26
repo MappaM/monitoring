@@ -1,0 +1,12 @@
+{% extends 'builder/stage.html' %}
+
+{% block stage %}
+	<h1>House</h1>
+	<form action="/builder/house_{{house_id}}/delete" method="post" id="stage_form">
+		{% csrf_token %}
+		<input type="hidden" name="confirm" value="1" />
+		Are you sure you want to <b>delete</b> this house? All parameters, walls, windows, appliances, meters and readings will be permanently lost.<br />
+		
+		<input type="submit" value="Yes" /> <input type="button" value="No" onclick="javascript:history.go(-1);"/>
+	</form>	
+{% endblock %}

@@ -1,0 +1,10 @@
+<p>Nouvelle maison</p>
+
+<form action="{% url 'builder:add_house' %}" method="post">
+{% csrf_token %}
+
+    <input type="text" name="name" id="name" value="{{ house.name }}" />
+    <label for="name">{{ house.name_text }}</label><br />
+
+<input type="submit" value="Enregistrer" />
+</form>

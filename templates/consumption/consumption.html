@@ -1,0 +1,410 @@
+{% extends "base/base.html" %}
+
+{% block title %}Consumption{% endblock %}
+
+{% block content %}
+	{% load compressed %}
+	{% compressed_css 'plan' %}
+	{% compressed_css 'consumption' %}
+	<h1>Consumption</h1>		
+	<script type="text/javascript" src="/static/js/highcharts.js"></script>
+	<div id ="builder_tools">
+		<script type="text/javascript">
+			var plans = new Array();		
+			var meters;		
+			var meterSize = 5.0;
+			var energies_used = new Array();
+			var scrolled = false;
+			//Retrieving list of all energies
+			var energies = jsonStripModel({{energies|safe}});
+			
+			function meterResize(plan) {
+				if (!plan) return;
+					$('.meter_switch').each(function(index,elem) {
+						
+						var w  = plan.onemeter * plan.meterSize * 0.90 *0.4 ;
+						
+						$(this).css('fontSize',w/4 );
+						$(this).find('.txt').css('paddingTop', (w / 4)*1.5);
+						$(this).find('img').width(w /4);
+						$(this).find('img').height(w  /4);
+					});
+					$('.plan_meter').each(function(index,elem){
+						var plan = $(this).data('plan');
+						var rpos = plan.renderer.getPosition($(this).data('position'));
+						var mult;
+						
+						if ($(this).hasClass('meter_switch')) {
+							mult = 0.4;
+						} else {
+							mult = 1;
+						}
+						$(this).width(plan.onemeter * plan.meterSize * 0.90 * mult);
+						$(this).height(plan.onemeter  * plan.meterSize * 0.90 * mult); 
+						$(this).css('left', rpos.x - (plan.onemeter * (plan.meterSize/2) * 0.95 * mult) + 'px');
+						$(this).css('top', rpos.y - (plan.onemeter * (plan.meterSize/2) * 0.95 * mult) + plan.canvas.parent().padding().top  + 'px');
+						var chart = $(this).find('.hchart');
+						if (chart.size() > 0) {
+							var c = chart.highcharts();
+							c.setSize(chart.width(),chart.height(),false);	
+						}
+					});
+					
+					{% if request.user.profile.autoscroll %}
+					if ($(window).height()< $('#plans').height() + $('#plans').offset().top && !scrolled) {
+						scrolled = true;
+						$('html, body').stop().animate({
+					        scrollTop: $('#plans').offset().top - 10
+					    }, 1000, 'swing');
+					}
+					
+					{% endif %}
+			}
+			
+			var bfR =0;
+			/**
+			 * Put the view in double mode or not according to the size
+			 */
+			function beforeResize(plan) {		
+				bfR++;
+				if (bfR == plans.length) {
+					if (doubleMode()) {
+						for (var i = 0; i < plans.length; i ++) {
+							plans[i].resize_height = true;
+							plans[i].onemeter_min = 25;
+							plans[i].onemeter_max = 45; 
+						}
+						var onemeter = 60;
+						for (var i = 0; i +1 < plans.length; i += 2) {
+							var tl = plans[i].l + plans[i + 1].l;
+							onemeter = Math.min(onemeter,Math.floor($('#plans').width() / tl));
+						}
+						var i = 0;
+						
+						for ( i = 0; i +1 < plans.length; i +=2) {
+							plans[i].canvas.parent().css('float','left');
+							plans[i + 1].canvas.parent().css('float','left');
+							if (plans[i].offsetY < plans[i + 1].offsetY) {
+								plans[i + 1].canvas.parent().css('paddingTop',Math.abs(plans[i].offsetY - plans[i + 1].offsetY) * Math.min(onemeter,plans[i+1].onemeter_max)); 
+							}
+							plans[i].autoresize = false;
+							plans[i+1].autoresize = false;
+							plans[i].onemeter = onemeter;
+							plans[i + 1].onemeter = onemeter;
+							plans[i].resize();
+							meterResize(plans[i]);
+							plans[i+1].resize();
+							meterResize(plans[i + 1]);
+						}
+						
+						if ((plans.length % 2) == 1) {
+							plans[i].canvas.parent().css('float','left');
+							plans[i].autoresize = false;
+							plans[i].onemeter = onemeter;
+							plans[i].resize();
+							
+							meterResize(plans[i]);
+						}
+						bfR = 0; 
+					} else {
+						var h;
+						for (var i = 0; i < plans.length; i ++) { 
+							plans[i].canvas.parent().css('float','none');
+							plans[i].autoresize = true;
+							
+							if (plans.length > 1) {
+								plans[i].resize_height = false;
+								plans[i].onemeter_min = 25;
+								plans[i].onemeter_max = 45;
+							}
+							if (i + 1 < plans.length)
+								plans[i + 1].canvas.parent().css('paddingTop',0);
+						}
+						$('#plans').css('minHeight',h);
+						if (plans.length == 1) {
+							var pp = plans[0].canvas.parent().parent();
+							pp.css('margin','auto');
+							pp.width((plans[0].l * plans[0].onemeter + 1) + pp.padding().left + pp.padding().right);
+						}
+						bfR = 0; 
+						meterResize(plans[i]);
+					}
+					
+				}
+			}
+			
+			function createMeter(plan,meter,position) {
+				var rpos = plan.renderer.getPosition(position);
+				
+				//If the meter is a switch
+				if (meter.energy.short_name=='switch') { 
+					var m = $('<div class="plan_meter meter_switch'
+							+ ((meter.appliance_link === null) ? ' meter_global' : '')
+							+ '" style="font-size:'
+							+ (plan.onemeter * plan.meterSize * 0.1) + 'px;"></div>');
+					m.data('plan',plan);
+					m.data('position',position);
+					$.ajax({url:
+						'/data/last/'+meter.hash+'/86400',
+						success:function (data) {	
+							
+							if (data == 'NODATA') {
+								data = 1;
+								$.ajax({url:'/data/'+meter.hash+'/1'});
+							}
+	
+							if (data >= 1) {
+								m.append('<div class="txt">ON</div>');
+								m.addClass('switch_on');
+							} else {
+								m.append('<div class="txt">OFF</div>');
+								m.addClass('switch_off');
+							}
+							m.append('<div class="historic"><a href="/historic/meter/' + meter.pk + '"><img src="/static/img/symbols/historic_mini.png" /></a></div>');
+							m.click(function() {
+								$.ajax({url:'/data/'+meter.hash+'/'+(1 - parseFloat(data)),
+									success:function() {
+										
+										if (m.hasClass('switch_on')) {
+											m.removeClass('switch_on');
+											m.addClass('switch_off');
+											m.find('div:first').html('OFF');
+										} else {
+											m.removeClass('switch_off');
+											m.addClass('switch_on');
+											m.find('div:first').html('ON');
+										}
+									}});
+							});
+							
+						}
+					});
+					m.css('left', rpos.x - plan.onemeter * (plan.meterSize/2) * 0.475 + 'px');
+					m.css('top', rpos.y - (plan.onemeter * (plan.meterSize/2) * 0.475) + plan.canvas.parent().padding().top + 'px');
+				} else {
+					var m = $('<div class="plan_meter meter_info'
+							+ ((meter.appliance_link === null) ? ' meter_global' : '')
+							+ '" style="font-size:'
+							+ Math.min(15, Math.max(plan.onemeter * 0.2,12)) + 'px;"><div style="background-image:url(/static/img/symbols/'+meter.energy.short_name+'_mini.png),url(\'/static/img/symbols/historic_mini.png\');" class="title"><div class="historic">&nbsp;</div></div><div class="content"></div></div>');
+					m.data('plan',plan);
+					m.data('position',position);
+					m.find('.historic').click(function(){window.location.href='/historic/meter/'+meter.pk;});
+					$.ajax({url:
+					'/data/last/'+meter.hash+'/86400',
+					success:function (data) {	
+						var content ='';
+						var title='';
+						
+						if (data=='NODATA') {
+							m.find('div:first').append('No data');
+							m.find('div:last').append('<span style="font-size:80%;font-style:italic;">Please configure your meter with the hash</span><br />'+meter.hash);
+						} else {	
+	
+							var data = parseFloat(data);
+							m.find('div:first').append((((Math.round(data) ==data)?Math.round(data):data.toFixed(2))) + ' ' + meter.energy.unit_instant);
+							
+							var unit = meter.energy.unit_instant.replace('Watt','W');
+							$.getJSON('/data/meter_'+meter.hash+'/instant/86400', function(raw_data) {
+								var data;
+								
+								if (raw_data.length > 30 || meter.energy.short_name == 'temp') {
+									data = new Array();
+									
+									var cons = Math.max(2,Math.floor(raw_data.length / 20));
+									
+									for (var i = 0; i < raw_data.length - cons; i+= cons) {
+										var time = 0;
+										var sum = 0;
+										for (var j = 0; j < cons; j++) {
+											time += raw_data[i + j][0];
+											sum += raw_data[i + j][1];
+										}
+										data.push([time / cons, sum/cons]);
+									}
+								} else {
+									data = raw_data;
+								}
+								m.find('div:last').css('paddingTop',0);
+								
+								m.find('div:last').css('height','80%');
+								var c= $('<div class="hchart"></div>');
+								m.find('div:last').append(c);
+								c.css('height','100%');
+								var chart = new Highcharts.Chart({
+							      	chart: {
+							      		renderTo:c[0],
+							      		type: 'spline',
+							      		backgroundColor:'none',
+	
+							      	},						        
+							        tooltip: {
+						                shared: true,
+						                borderColor:meter.energy.color,
+						            },
+						            legend:{
+						            	enabled:false
+						            },
+						            title: {
+						            	text:''
+						            },      
+						            yAxis:{
+						            	title:'',
+						            
+						            	labels:{formatter: function(){
+						            		if (this.value> 1000000)
+						            			return this.value.toFixed(0)/1000000 + ' M' +unit
+						            		else if (this.value> 1000)
+						            			return this.value.toFixed(0)/1000 + ' k' +unit
+						            		else
+						            			return this.value.toFixed(0) + ' ' +unit
+						            		},
+						            	useHTML:true},
+						            },
+						            xAxis: {
+						            	type:'datetime',
+						            	ordinal: false,
+						            },
+						            plotOptions: {
+						                series: {
+						                    pointPadding: 0,
+						                    groupPadding: 0,   
+						                    marker: {
+												enabled:(data.length<2)
+											}
+						                    }
+						                },    
+						                credits: {
+						                    enabled: false
+						                  },
+							        series : 
+									[
+							             {
+							        	
+											name : meter.energy.title,
+											data : data,
+											color:meter.energy.color,
+											tooltip: {
+												valueDecimals: 2,
+							                    valueSuffix: ' '+unit.replace('&deg;','°'),
+							                    useHTML:true,
+							                }
+										}
+										]
+								
+							    });
+								 chart = c.highcharts();
+								 if (chart.yAxis[0].getExtremes().min < 0 && chart.yAxis[0].getExtremes().dataMin >= 0) {
+									chart.yAxis[0].setExtremes(0,null);
+								 }
+								
+							});
+						
+			
+						}
+						
+				}});				
+				}
+			   
+				plan.canvas.parent().append(m);
+				
+				
+			}
+			
+			function doubleMode() {
+				return $('#plans').width() /({{length}} + meterSize * 2)  > 50 && plans.length > 1;
+			}
+			
+			$(document).ready(function(){	
+				Highcharts.setOptions({
+			        global: {
+			            useUTC: false
+			        }
+			    });
+				
+				
+				floors = new Array();
+				nofloors = new Array();
+				{% for f in floors %}
+					{% if f.has_meters %}floors.push({pk:{{f.pk}},house:'{{f.house.pk}}',floor:'{{f.floor}}'});
+					{% else %}nofloors.push({pk:{{f.pk}},house:'{{f.house.pk}}',floor:'{{f.floor}}'});
+					{% endif %}
+				{% endfor %}
+						if (floors.length==0) {
+							//Si pas de floors avec compteur, on affiche quand même le RDC
+							var rdc;
+							for (var i = 0; i < nofloors.length; i++) {
+								if (nofloors[i].floor == 'FLOOR') rdc = nofloors[i];
+							}
+							floors.push(rdc);
+						}
+						meters = jsonStripModel({{meters|safe}});	
+	
+						for (var i=0; i < meters.length; i++) {
+							var meter = meters[i];
+							if (meter.appliance_link == null) {
+								energies_used.push(meter.energy);
+								continue;
+							}						
+						}
+						
+					
+						var swidth='';
+		
+							
+						
+						for (var i=0; i<floors.length; i++) {
+							var cvs = $('<canvas id="plan' + floors[i].pk +'" style="width:100%;margin:auto;"></canvas>');
+							var container = $('<div id="plan_container' + floors[i].pk +'" style="margin:auto;position:relative;'+swidth+'"></div>');
+							$('#plans').append(container);
+							container.append(cvs);
+							
+							var p = new Plan({	precision:0,
+								length:{{length|floatformat:-2}} + meterSize*2 ,
+								width:{{width|floatformat:-2}} + meterSize*2 + (i==0?4:0) ,
+								offsetX:{{offset.x|floatformat:-2}} - meterSize,
+								offsetY:{{offset.y|floatformat:-2}} - meterSize + (i==0?-(4):0),
+								draw_grid:false,
+								isMeterResized:false,
+								onemeter_max:45,
+								meterSize:meterSize,
+								display_global_meters:(i==0),
+								canvas:cvs,
+								enable_mouse:false,
+								colors:new Array('#5C0DAC',	'#542881',	'#3A0470',	'#8B42D6',	'#9F69D6'),
+								enable_keys:false});
+							p.getFloorContent(floors[i].pk);
+							p.events.register('applianceLoaded',refreshMeters);
+							p.createMeter = createMeter;		
+							p.beforeResize = beforeResize;
+							p.afterResize = function(plan){
+								window.setTimeout(function(){meterResize(plan)},100);
+							};
+							plans.push(p);						
+						
+								
+						}
+						
+						
+						$(window).smartresize(meterResize);
+						
+						
+				
+			});
+			
+			function getCurrentTool() {
+				return '';
+			}
+
+		</script>
+	</div>
+	
+
+	<div id="plan_message" style="clear:both;"></div>
+	<div id="plans" style=""></div>
+	{% compressed_js 'builder' %}
+	{% compressed_js 'plan' %}
+	{% compressed_js 'plan_appliance' %}
+	{% compressed_js 'plan_meter' %}
+	<div id="gonext_error" class="form_error"></div>
+
+{% endblock %}
