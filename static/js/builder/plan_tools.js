@@ -56,7 +56,7 @@
 					s = 0;
 				else 
 					s = fh/3;
-				e = $('<canvas  width="'+ (fw + 2) + '" height="' + (fh + 2) + '" style="' + st + '" class="floor_draw floor_' + floors[i].floor.toLowerCase() + '" id="floor_roof"></canvas>');
+				e = $('<canvas id="floor'+floors[i].pk+'" class="floor'+floors[i].pk+'" width="'+ (fw + 2) + '" height="' + (fh + 2) + '" style="' + st + '" class="floor_draw floor_' + floors[i].floor.toLowerCase() + '" id="floor_roof"></canvas>');
 				$('#floor_show').append(e);
 				e.ready(function() {
 					var c=document.getElementById("floor_roof");

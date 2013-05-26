@@ -1,4 +1,4 @@
-/*
+/*!
  * models.js
  * Contains the javascript implementation of the django models
  */
