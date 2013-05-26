@@ -1,3 +1,8 @@
+/*
+ * models.js
+ * Contains the javascript implementation of the django models
+ */
+
 var Meter = function(energy, mode, hash, appliance_link) {
 	this.energy = energy;
 	this.mode = mode;
@@ -35,7 +40,6 @@ function Position(x,y) {
 	}
 };
 
-//Todo : excanvas G_vmlCanvasManager.initElement(el);
 /**
  * Return X if orientation is H and Y if orientation is V
  * @param orientation Orientation you want
@@ -66,7 +70,7 @@ Position.prototype.set = function(orientation, value) {
 };
 
 Position.prototype.add = function(orientation, value) {
-	this.set(orientation,this.get(orientation) + value)
+	this.set(orientation,this.get(orientation) + value);
 };
 
 Position.prototype.getOrientation = function(orientation, value) {

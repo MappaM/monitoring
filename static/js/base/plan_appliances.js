@@ -1,3 +1,7 @@
+/* plan_appliances.js
+ * Contains all functions relative to appliances and drawing them on a plan
+ */
+
 /**
  * Save all appliances links in database
  * @param callback Function to call when successfully saved (optional) 

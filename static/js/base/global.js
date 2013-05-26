@@ -1,3 +1,8 @@
+/* global.js
+ * This file contains all function that must be accessible in all applications
+ * 
+ */
+
 Array.prototype.remove = function(from, to) {
   var rest = this.slice((to || from) + 1 || this.length);
   this.length = from < 0 ? this.length + from : from;
@@ -158,6 +163,10 @@ function jsonStripModel(model) {
 	return ar;
 }
 
+/**
+ * Put a jquery object in a dialog mode with all page content behind a black filter except the dialog
+ * @param content The jquery object
+ */
 function modal(content) {
 	var overlay = $('<div class="overlay"></div>');
 	$('body').append(overlay);

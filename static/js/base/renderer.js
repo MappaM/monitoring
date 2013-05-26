@@ -1,4 +1,8 @@
-function Renderer2D (ctx,onemeter,offsetX,offsetY,pl,pw) {
+/* renderer.js
+ * Contains the implementation of Renderer2D, a renderer which receive a canvas and draw walls, window and appliances on it according to commands
+ */
+
+var Renderer2D = function (ctx,onemeter,offsetX,offsetY,pl,pw) {
     this.ctx = ctx;
     this.onemeter = onemeter;
     this.offsetX = offsetX;
@@ -8,7 +12,7 @@ function Renderer2D (ctx,onemeter,offsetX,offsetY,pl,pw) {
     
     this.defaultColors = new Array('#E4D3F5','#E5EFF4','#E5F6DD','#E8F5D3','#F5F3D9', '#F5ECE1', '#F5DFDF','#F5DFE5', '#F4D3F5', '#E9DFF5');
 
-}
+};
  
 Renderer2D.prototype.drawGrid = function(xN,yN) {
 	this.ctx.lineWidth = 1;
@@ -140,7 +144,13 @@ Renderer2D.prototype.getApplianceScale = function() {
 };
 
 
-
+/**
+ * Create a link between two position
+ * @param a First position
+ * @param b Second position
+ * @param color Color of the link
+ * @param width Weight of the link
+ */
 Renderer2D.prototype.link = function(a,b,color,width) {
 	if (width == undefined) width = 3;
 	var pa = this.getPosition(a);

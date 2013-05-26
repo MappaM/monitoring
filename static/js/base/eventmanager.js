@@ -1,3 +1,8 @@
+/*
+ * eventmanager.js
+ * This file implements the class EventManager, a stack to register and call events of an object
+ */
+
 var EventManager = function() {
 	
 };

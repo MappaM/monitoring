@@ -60,6 +60,8 @@
 				$('#floor_show').append(e);
 				e.ready(function() {
 					var c=document.getElementById("floor_roof");
+					if (!c.getContext)
+						G_vmlCanvasManager.initElement(e);
 					var ctx=c.getContext("2d");
 					var th = fh - s;
 					ctx.moveTo(1,th + 2);
