@@ -69,7 +69,7 @@ Position.prototype.set = function(orientation, value) {
 };
 
 Position.prototype.add = function(orientation, value) {
-	this.set(orientation,this.get(orientation) + value);
+	this.set(orientation, (this.get(orientation) + value));
 };
 
 Position.prototype.getOrientation = function(orientation, value) {

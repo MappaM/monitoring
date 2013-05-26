@@ -1,6 +1,5 @@
 /* global.js
  * This file contains all function that must be accessible in all applications
- * 
  */
 
 Array.prototype.remove = function(from, to) {
