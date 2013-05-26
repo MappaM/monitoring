@@ -438,7 +438,7 @@ function refreshMeters(plan) {
 	}
 	
 	//Cropping the plan after the first pass, if there's no meter in one side
-	if (plan.params.isMeterResized === false) {
+	if (plan.params.isMeterResized === false && !((/android/.test(navigator.userAgent.toLowerCase()) && !/chrome/.test(navigator.userAgent.toLowerCase())))) {
 		plan.params.isMeterResized = true;		
 
 		//We crop a side only if it has no meter
