@@ -177,18 +177,17 @@ Plan.prototype.getApplianceAt = function(point) {
  * Redraw the plan
  */
 Plan.prototype.refresh = function () {
-	console.log("Refreshing plan...");
+	//console.log("Refreshing plan...");
 	//Cleaning canvas
 	this.ctx.clearRect(0,0,this.pl + 1,this.pw + 1);
 	
 	if (/android/.test(navigator.userAgent.toLowerCase()) && !/chrome/.test(navigator.userAgent.toLowerCase())) {
-		console.log(navigator.userAgent.toLowerCase());
+		
 		
 
 		this.ctx.fillStyle = "rgba(255, 255, 255, 1)";
 
-		console.log(this.pl + 1);
-		console.log(this.pw + 1);
+		
 		this.ctx.width = this.ctx.width;
 
 		this.ctx.fillRect (0, 0, this.pl + 1, this.pw + 1);

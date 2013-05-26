@@ -330,6 +330,7 @@
 					{% else %}nofloors.push({pk:{{f.pk}},house:'{{f.house.pk}}',floor:'{{f.floor}}'});
 					{% endif %}
 				{% endfor %}
+				
 						if (floors.length==0) {
 							//Si pas de floors avec compteur, on affiche quand même le RDC
 							var rdc;
