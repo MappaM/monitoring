@@ -187,6 +187,7 @@ Plan.prototype.refresh = function () {
 		console.log(navigator.userAgent.toLowerCase());
 		this.ctx.fillStyle = "rgba(255, 255, 255, 1)";
 		//this.ctx.fillRect (0, 0, this.pl + 1, this.pw + 1);
+		console.log(this.canvas.width(),this.canvas.height());
 		this.ctx.fillRect(0,0,this.canvas.width(),this.canvas.height());
 	}
 
