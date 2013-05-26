@@ -184,10 +184,9 @@ Plan.prototype.refresh = function () {
 	this.ctx.clearRect(0,0,this.pl + 1,this.pw + 1);
 	
 	if (/android/.test(navigator.userAgent.toLowerCase())) {
-		alert("android detected");
-		alert(navigator.userAgent.toLowerCase());
-		ctx.fillStyle = "rgba(255, 255, 255, 1)";
-		ctx.fillRect (0, 0, this.pl + 1, this.pw + 1);
+		console.log("android detected");
+		console.log(navigator.userAgent.toLowerCase());
+		canvas.width = canvas.width;
 	}
 
 	//Drawing the grid
