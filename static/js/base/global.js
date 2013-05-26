@@ -9,14 +9,13 @@ Array.prototype.removeEquals = function(obj) {
 };
 
 
-
 function houseChoose(id) {
 		if (id == '-1') return;
 	if (id == '') {
 		
 		$.ajax({
 			url:'/select_house/',
-			success:function(data){window.location.href = '/builder/'},
+			success:function(data){window.location.href = '/builder/';},
 		});
 	} else {
 		$.ajax({
