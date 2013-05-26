@@ -32,8 +32,8 @@
 	</script>
 	<div class="people_addzone">
 		<form action="/builder/data/people/add" method="post" id="stage_form">
-			{% include "base/form.html" %}
-			<a href="javascript:addElement();" class="form_btn builder_btn_add">&nbsp;</a>
+			<div style="float:left;">{% include "base/form.html" %}</div>
+			<div style="float:right;"><a href="javascript:addElement();" class="form_btn builder_btn_add">&nbsp;</a></div>
 			<div id="stage_form_error" class="form_error" style="clear:both;"></div>
 		</form>
 	</div>
