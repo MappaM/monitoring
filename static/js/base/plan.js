@@ -185,7 +185,7 @@ Plan.prototype.refresh = function () {
 	
 	if (/android/.test(navigator.userAgent.toLowerCase()) && !/chrome/.test(navigator.userAgent.toLowerCase())) {
 		console.log(navigator.userAgent.toLowerCase());
-		this.ctx.fillStyle = "rgba(0, 0, 0, 0)";
+		this.ctx.fillStyle = "rgba(255, 255, 255, 1)";
 		this.ctx.fillRect (0, 0, this.pl + 1, this.pw + 1);
 	}
 
