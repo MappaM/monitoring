@@ -79,7 +79,7 @@ function Plan(params) {
 	if (typeof grid_click == 'function')
 		this.canvas.click(grid_click);
 	if (typeof getCurrentTool != 'function')
-		getCurrentTool = function(){return ''};
+		getCurrentTool = function(){return '';};
 
 	var plan = this;
 	if (this.enable_mouse) {
@@ -120,7 +120,7 @@ function Plan(params) {
 	this.autoresize = true;
 	
 	//Variable incremented when the users type "N", used to switch items, orientations, etc...
-	this.items_next = 0
+	this.items_next = 0;
 
 	this.resize = function() {
 		if (this.beforeResize != undefined) this.beforeResize(this);
@@ -152,7 +152,7 @@ function Plan(params) {
 		this.events.call('resized',this);
 		this.refresh();
 		if (this.afterResize != undefined) this.afterResize(this);
-	}
+	};
 	$(window).smartresize(function(){plan.resize();});
 	$(window).scroll(function() {
 	    clearTimeout($.data(this, "scrollTimer"));
@@ -160,7 +160,6 @@ function Plan(params) {
 	    	plan.resize();
 	    }, 50));});
 	this.resize();
-	
 }	
 
 /**
@@ -171,7 +170,7 @@ Plan.prototype.getApplianceAt = function(point) {
 		if (this.appliances_links[i].center.equals(point)) return i;
 	}
 	return -1;
-}
+};
 
 
 /**
@@ -185,19 +184,13 @@ Plan.prototype.refresh = function () {
 	if (/android/.test(navigator.userAgent.toLowerCase()) && !/chrome/.test(navigator.userAgent.toLowerCase())) {
 		console.log(navigator.userAgent.toLowerCase());
 		
-		var w = this.canvas.width;
-		var h = this.canvas.height;   // save old width/height
-		this.canvas.width = this.canvas.height = 0;  //set width/height to zero
-		this.canvas.width=w;
-		this.canvas.height=h;
+
 		this.ctx.fillStyle = "rgba(255, 255, 255, 1)";
-		//this.ctx.fillRect (0, 0, this.pl + 1, this.pw + 1);
-		console.log(this.canvas.width());
-		console.log(this.canvas.height());
+
 		console.log(this.pl + 1);
 		console.log(this.pw + 1);
 		this.ctx.width = this.ctx.width;
-		this.ctx.fillRect(0,0,this.canvas.width(),this.canvas.height());
+
 		this.ctx.fillRect (0, 0, this.pl + 1, this.pw + 1);
 	}
 
@@ -290,7 +283,7 @@ Plan.prototype.refresh = function () {
 	if (this.start != undefined) {
 		this.renderer.drawCircle(this.start.x * this.onemeter, this.start.y * this.onemeter,'green');
 	}
-}
+};
 
 
 /**
@@ -424,7 +417,7 @@ Plan.prototype.get_e_pos = function(e) {
 	var w = Math.round((rw * this.precision) / this.onemeter) / this.precision;
 	if (l == 0 || w == 0 || l == this.l || w==this.w) return undefined;
 	return new Position(l,w);
-}
+};
 
 
 
@@ -435,7 +428,7 @@ Plan.prototype.toolChanged = function() {
 	this.start = undefined;
 	this.cursor = undefined;
 	plan.refresh();
-}
+};
 
 
 /**
@@ -501,7 +494,4 @@ Plan.prototype.isExterior = function(point) {
 			return this.labels[point.y][point.x]==0;
 		}
 	}
-}
-
-
-
+};
