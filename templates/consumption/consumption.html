@@ -377,7 +377,7 @@
 							p.createMeter = createMeter;		
 							p.beforeResize = beforeResize;
 							p.afterResize = function(plan){
-								window.setTimeout(function(){meterResize(plan)},100);
+								window.setTimeout(function(){meterResize(plan)},1000);
 							};
 							plans.push(p);						
 						
