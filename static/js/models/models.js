@@ -1,8 +1,7 @@
-/*!
+/*
  * models.js
  * Contains the javascript implementation of the django models
  */
-
 var Meter = function(energy, mode, hash, appliance_link) {
 	this.energy = energy;
 	this.mode = mode;
