@@ -3,11 +3,12 @@
 	
 	<div id="meter_chooser">
 		<input type="hidden" value="meter" name="tool" id="tool" />
-		<ul id="meter_menu">
+		<ul id="meter_menu" style="">
 			<li class="meter meter_drop" id="meter_deleter"><img src="/static/img/symbols/remove.png" /></li>
 		</ul>
 		<div id="wall_error" style="" class="form_error"></div>
 	</div>	
+	
 {% endblock %}
 {% block plan_footer %}
 <script type="text/javascript">
@@ -18,10 +19,6 @@
 		
 		function save(callback) {
 			plan.save_meters(callback,'{{house_id}}','{{csrf_token}}');
-		}
-		
-		function grid_click(e) {
-			
 		}
 		
 
@@ -98,6 +95,7 @@
 	<div style="clear:both">
 		<a href="javascript:save(function(){location.href='/builder/stage6/';});" class="form_btn builder_btn_prev">&nbsp;</a>
 		<a href="javascript:save(function(){location.href='/consumption/';});" class="form_btn builder_btn_next">&nbsp;</a>
+	</div>
 	</div>
 	{% load compressed %}
 	{% compressed_js 'plan_appliance' %}

@@ -269,7 +269,7 @@ def stage7(request):
                 'energies_used':serializers.serialize("json",e),
                 'energies':serializers.serialize("json",Energy.objects.all()),
                 'meter_modes':json.JSONEncoder().encode(Meter.MODES),
-                'plan_data':'{    precision:0, length:' + str(maxCorner.x - minCorner.x + 4) + ', width:' + str(maxCorner.y - minCorner.y + 6) + ',offsetX:' + str(minCorner.x - 2) + ', offsetY:' + str(minCorner.y - 4) + ', draw_grid:false,onemeter_max:76}',
+                'plan_data':'{onemeter_min:35,    precision:0, length:' + str(maxCorner.x - minCorner.x + 4) + ', width:' + str(maxCorner.y - minCorner.y + 6) + ',offsetX:' + str(minCorner.x - 2) + ', offsetY:' + str(minCorner.y - 4) + ', draw_grid:false,onemeter_max:76}',
                 'form':meterForm,
                 'title':'Meter',
                 'appliance_types_categories':ApplianceType.APPLIANCE_CATEGORY,

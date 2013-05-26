@@ -31,7 +31,7 @@ h1 {
 	margin:10px;
 	padding:14px;
 	min-width:680px;
-	overflow:hidden;
+	overflow:auto;
 }
 
 
@@ -295,9 +295,9 @@ h1 {
 	padding:0px !important;
 	background-color:#cc9d51;
 	text-align:left;
-
+	
 	float:left;
-	height:129px !important;
+	height:auto !important;
 }
 
 #meter_menu {

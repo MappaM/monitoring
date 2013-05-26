@@ -256,6 +256,12 @@ PIPELINE_JS = {
                                   ),
               'output_filename': 'js/base/plan_meter.min.js',
             },
+    'touch-punch': {
+             'source_filenames': (
+                    'js/jquery.ui.touch-punch.js',
+                                  ),
+              'output_filename': 'js/jquery.ui.touch-punch.min.js',
+            },
     'global': {
              'source_filenames': (
                     'js/jquery.cookie.js',

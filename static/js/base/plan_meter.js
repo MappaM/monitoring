@@ -11,7 +11,7 @@ function initialiseDraggableMeter(energies_used) {
 		meter.append(img);
 		meter.data('energy', energies_used[i]);
 		meter.draggable({
-			containment : plan.canvas,
+			containment : plan.canvas.parent().parent(),
 			helper : 'clone',
 			zIndex : 500,
 			distance : 5,
