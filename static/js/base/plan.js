@@ -135,14 +135,11 @@ function Plan(params) {
 					scrollTop = document.body.scrollTop;
 				this.pw = $(window).height() - this.canvas.parent().offset().top + scrollTop - 40; //40 For average following things like button
 				this.onemeter =  Math.max(this.onemeter_min,Math.min(Math.floor((this.pw - 1) / this.w),Math.floor((this.pl - 1) / this.l)));
-				var plan = this;
-				
 			} else {
 				this.onemeter =  Math.floor((this.pl - 1) / this.l);
 			}
-			
-			
 		}
+		
 		if (this.onemeter > this.onemeter_max) this.onemeter = this.onemeter_max;
 		this.pl = this.onemeter * this.l - 1;		
 		this.pw = this.onemeter * this.w - 1;
@@ -167,6 +164,9 @@ function Plan(params) {
 	
 }	
 
+/**
+ * Return the appliance at a point on the plan
+ */
 Plan.prototype.getApplianceAt = function(point) {
 	for (var i = 0; i < this.appliances_links.length; i++) {
 		if (this.appliances_links[i].center.equals(point)) return i;
@@ -182,6 +182,11 @@ Plan.prototype.refresh = function () {
 	console.log("Refreshing plan...");
 	//Cleaning canvas
 	this.ctx.clearRect(0,0,this.pl + 1,this.pw + 1);
+	
+	if (/android/.test(navigator.userAgent.toLowerCase())) {
+		ctx.fillStyle = "rgba(255, 255, 255, 0)";
+		ctx.fillRect (0, 0, this.pl + 1, this.pw + 1);
+	}
 
 	//Drawing the grid
 	if (this.draw_grid)
