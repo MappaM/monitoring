@@ -186,7 +186,7 @@ Plan.prototype.refresh = function () {
 	if (/android/.test(navigator.userAgent.toLowerCase())) {
 		console.log("android detected");
 		console.log(navigator.userAgent.toLowerCase());
-		canvas.width = canvas.width;
+		this.ctx.width = this.ctx.width;
 	}
 
 	//Drawing the grid
