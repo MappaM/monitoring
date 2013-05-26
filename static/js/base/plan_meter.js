@@ -12,10 +12,10 @@ function initialiseDraggableMeter(energies_used) {
 		meter.data('energy', energies_used[i]);
 		meter.draggable({
 			containment : plan.canvas.parent().parent(),
-			helper : 'clone',
+			helper : function(){return $('<div style="width:100px;height:100px;background-color:black">&nbsp;</div>');},
 			zIndex : 500,
-			distance : 5,
-			opacity : 0.9,
+			distance : 3,
+			opacity : 1,
 			revert : "invalid",
 		});
 		$('#meter_menu').prepend(meter);
