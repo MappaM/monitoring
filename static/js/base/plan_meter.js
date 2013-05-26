@@ -11,11 +11,10 @@ function initialiseDraggableMeter(energies_used) {
 		meter.append(img);
 		meter.data('energy', energies_used[i]);
 		meter.draggable({
-			containment : plan.canvas.parent().parent(),
-			helper : function(){return $('<div style="width:100px;height:100px;background-color:black">&nbsp;</div>');},
-			zIndex : 500,
+			containment : plan.canvas.parent(),
+			helper : function(){return $('<div style="z-index:1001;width:100px;height:100px;background-color:black">&nbsp;</div>');},
+			zIndex : 1001,
 			distance : 3,
-			opacity : 1,
 			revert : "invalid",
 		});
 		$('#meter_menu').prepend(meter);
