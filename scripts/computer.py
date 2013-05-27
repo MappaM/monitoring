@@ -1,5 +1,7 @@
 #!/bin/python
 
+#debendency  pywapi psi pysensors 
+
 import pywapi
 import sys
 import datetime
@@ -30,8 +32,9 @@ mobile = 0
 #Processor
 model = get_processor_name()
 if (re.search( "intel", model,re.I)):
-	print "Intel processor detected"
+
 	model = re.sub( "\(r\)|\(tm\)|intel|[@][ ]?[0-9]+.[0-9]+[kmghz]+|cpu|\t", " ", model,0,re.I)
+	print "Intel processor detected : " + model
 	url = "http://www.intel.eu/content/www/eu/en/search.html?&allwords="+re.sub("[ ]+","+",model)
 	content = urllib2.urlopen(url).read()
 	m = re.search("(http://www.intel.com/support/processors/.*?)\"",content,re.I | re.M)
@@ -56,6 +59,7 @@ if (re.search( "intel", model,re.I)):
 			processor_energy = 65
 	else:
 		processor_energy = 65
+	print "Processour has a MAX TDP of %d Watt" % processor_energy
 else:
 	print "Processour unknow, assuming MAX TDP 65Watt"
 	processor_energy = 65
@@ -76,9 +80,15 @@ nfan = 0
 command = "cat /sys/class/thermal/cooling_device*/cur_state"
 all_info = subprocess.check_output(command, shell=True).strip()
 for line in all_info.split("\n"):
-    print line
     if (float(line) >= 1):
 	 nfan += 1;
+
+if (mobile and nfan==0):
+	nfan = 1
+
+#The power fan of desktop is nearly never monitored
+if (not mobile):
+	nfan += 1
 print "You appear to have %d fan." % nfan
 
 
