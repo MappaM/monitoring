@@ -42,8 +42,7 @@ if (re.search( "intel", model,re.I)):
 		processor_energy = float(tdp.group(1))
 		print "Processor MAX TDP found on intel.com : %f" % processor_energy
 	else:
-		regex = "href=\"http://ark.intel.com/Product.aspx\?id=([0-9]+)" + re.sub("[ ]+",".*?",model)
-		print regex
+		regex = "href=\"/products/([0-9]+)/" + re.sub("[ ]+",".*?",model)
 		m2 = re.search(regex,content,re.I | re.M | re.S)
 		if m2:
 			pid =  m2.group(1)
