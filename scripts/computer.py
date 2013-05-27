@@ -1,6 +1,7 @@
 #!/bin/python
 
-#debendency  pywapi psi pysensors 
+#dependency  pywapi psi pysensors 
+#program dependency hdparm nvidia-smi if nvidia
 
 import pywapi
 import sys
@@ -11,7 +12,7 @@ import urllib2
 import multiprocessing
 import psi
 import numpy
-
+from math import log
 if (len(sys.argv) != 1):
 	print 'Usage : python.py computer.py'
 	sys.exit(-1)
@@ -38,21 +39,24 @@ if (mobile):
 model = get_processor_name()
 processor_energy = -1
 while (processor_energy == -1): #Intel sometimes return a 500 error. We just have to retry 5 to 10 times...
-	if (re.search( "intel", model,re.I)):
-		model = re.sub( "\(r\)|\(tm\)|intel|[@][ ]?[0-9]+.[0-9]+[kmghz]+|cpu|celeron|\t", " ", model,0,re.I).strip()
-		if verbose:
-			print "Intel processor detected : " + model
-		url = "http://ark.intel.com/search?q="+re.sub("[ ]+","+",model)
-		try:
-			content = urllib2.urlopen(url).read()
 
+	try:
+		if (re.search( "intel", model, re.I)):		
+			modelstripped = re.sub( "\(r\)|\(tm\)|intel|[@][ ]?[0-9]+.[0-9]+[kmghz]+|cpu|celeron|\t", " ", model,0,re.I).strip()
+			if verbose:
+				print "Intel processor detected : " + modelstripped
+			url = "http://ark.intel.com/search?q="+re.sub("[ ]+","+",modelstripped)
+		
+			content = urllib2.urlopen(url).read()
+			
 			tdp = re.search("([0-9]+) W",content,re.I | re.M)
 			if tdp:
 				processor_energy = float(tdp.group(1))
 				if verbose:
 					print "Processor MAX TDP found on intel.com : %f" % processor_energy
 			else:
-				regex = "href=\"/products/([0-9]+)/" + re.sub("[ ]+",".*?",model)
+				regex = "href=\"/products/([0-9]+)/" + re.sub("[ ]+",".*?",modelstripped)
+				print content
 				m2 = re.search(regex,content,re.I | re.M | re.S)
 				if m2:
 					pid =  m2.group(1)
@@ -66,13 +70,13 @@ while (processor_energy == -1): #Intel sometimes return a 500 error. We just hav
 					if verbose:
 						print "Processor model could not be find on intel.com, assuming MAX TDP 65Watt"
 					processor_energy = 65
-		except:
-			pass
-	
-	else:
-		if verbose:
-			print "Processour manufcaturer unknow, assuming MAX TDP 65Watt"
-		processor_energy = 65
+
+		else:
+			if verbose:
+				print "Processor manufacturer unknow, assuming MAX TDP 65Watt"
+			processor_energy = 65
+	except urllib2.HTTPError:
+		processor_energy = -1;
 
 #Hard drives
 all_info = subprocess.check_output("ls /dev/sd[a-z]", shell=True).strip()
@@ -89,12 +93,12 @@ for drive in all_info.split("\n"):
 	else:
 		if mobile:	
 			if verbose:		
-				print "HDD Detected. Assuming 7Watt"
-			energy.append(7)
-		else:
-			if verbose:
 				print "HDD Detected. Assuming 2Watt"
 			energy.append(2)
+		else:
+			if verbose:
+				print "HDD Detected. Assuming 7Watt"
+			energy.append(7)
 
 #---Processor load
 load = (os.getloadavg()[2])/multiprocessing.cpu_count()
@@ -104,9 +108,56 @@ energy.append(processor_energy * (load/2 + 0.5))
 
 #Motherboard
 if (mobile):
-	energy.append(10)
+	energy.append(8)
 else:
-	energy.append(25)
+	energy.append(20)
+
+#Graphic card
+all_info = subprocess.check_output("glxinfo", shell=True).strip()
+vendor = ""
+card = ""
+for line in all_info.split("\n"):
+	if "vendor string" in line:
+            vendor = re.sub( ".*vendor string.*: ", "", line,1)
+	elif "renderer string" in line:
+            card = re.sub( ".*renderer string.*: ", "", line,1)
+
+if "NVIDIA" in vendor:
+	card = re.search( "^([a-z0-9 ]+)", card, re.I ).group(1)
+	
+	newcard = re.search("([0-9]{3,4})(M)?",card,re.I)
+	mobilegpu = newcard.group(2)
+	if mobilegpu:
+		gpumin = 10
+		gpumax = 100
+	else:
+		gpumin = 25
+		gpumax = 250
+
+	model = int(newcard.group(1))
+	#The old series are 4 number
+	if (model>1000):
+		gpumax = gpumax * 0.7
+		model = model/10
+	rangeingamme = (model % 100) / 10.0
+	if verbose:
+		print "Your gpu is %d / 10 of its gamme, its gamme starts from %d W to %d W" % (rangeingamme,gpumin,gpumax)
+
+	#Load is exponential with gamme
+	gpu = gpumin + ((1-(log(11-rangeingamme)/log(11))) * (gpumax-gpumin))
+
+	#For now we assume cpu load for gpu
+	gc = gpu * load
+	print "Your gpu has a load of %f, assuming %d Watts " % (load,gc)
+
+	#" nvidia-smi -q -d MEMORY "
+else:
+	#Vendor could not be found or internal chipset, assuming internal chipset (not much consumption)
+	gc = 2 if (mobile) else 5
+	if verbose:
+		print "Vendor of graphic card could not be found or internal chipset, assuming %d Watt"
+	
+energy.append(gc)
 
 #Fans
 nfan = 0
