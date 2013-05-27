@@ -74,10 +74,11 @@ else:
 #Fans
 nfan = 0
 command = "cat /sys/class/thermal/cooling_device*/cur_state"
-    all_info = subprocess.check_output(command, shell=True).strip()
-    for line in all_info.split("\n"):
-		print line
-		if (float(line) >= 1) nfan += 1;
+all_info = subprocess.check_output(command, shell=True).strip()
+for line in all_info.split("\n"):
+    print line
+    if (float(line) >= 1):
+	 nfan += 1;
 print "You appear to have %d fan." % nfan
 
 
