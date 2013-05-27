@@ -32,15 +32,16 @@ mobile = 0
 #Processor
 model = get_processor_name()
 if (re.search( "intel", model,re.I)):
-	print "Intel processor detected"
+
 	model = re.sub( "\(r\)|\(tm\)|intel|[@][ ]?[0-9]+.[0-9]+[kmghz]+|cpu|\t", " ", model,0,re.I)
+	print "Intel processor detected : " + model
 	url = "http://www.intel.eu/content/www/eu/en/search.html?&allwords="+re.sub("[ ]+","+",model)
 	content = urllib2.urlopen(url).read()
 	m = re.search("(http://www.intel.com/support/processors/.*?)\"",content,re.I | re.M)
 
 	if m:
 		url2 =  m.group(1)
-
+		
 		#Intel has mobile in the path for most mobile architecture. Quite convenient...
 		mobile = not (re.search("mobile",url2) == None)
 		if mobile:

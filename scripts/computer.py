@@ -41,7 +41,7 @@ if (re.search( "intel", model,re.I)):
 
 	if m:
 		url2 =  m.group(1)
-
+		print url2
 		#Intel has mobile in the path for most mobile architecture. Quite convenient...
 		mobile = not (re.search("mobile",url2) == None)
 		if mobile:
