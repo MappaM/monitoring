@@ -10,14 +10,26 @@ function initialiseDraggableMeter(energies_used) {
 		var img = energies_used[i].getMeterImage(92,92);
 		meter.append(img);
 		meter.data('energy', energies_used[i]);
+		
+		((function(meter){meter.click(function(){
+			if (plan.selectedMeter == meter) {
+				meter.css('backgroundColor','rgba(255, 255, 255, 0.2)');
+				plan.selectedMeter = undefined;
+			} else {
+				if (plan.selectedMeter != undefined) return;
+				meter.css('backgroundColor',meter.data('energy').color);
+				plan.selectedMeter = meter;
+			}
+		});})(meter));
 		meter.draggable({
-			containment : plan.canvas.parent(),
-			helper : function(){return $('<div style="z-index:1001;width:100px;height:100px;background-color:black">&nbsp;</div>');},
-			zIndex : 1001,
-			distance : 3,
+			containment : plan.canvas.parent().parent(),
+			helper : 'clone',
+			zIndex : 500,
+			distance : 5,
+			opacity : 0.9,
 			revert : "invalid",
 		});
-		$('#meter_menu').prepend(meter);
+		$('#meter_menu').append(meter);
 	}
 }
 
@@ -113,6 +125,7 @@ function createDropables(plan) {
 		ma.height(w);
 		ma.css('left', (p.x - w / 2) + 'px');
 		ma.css('top', (p.y - w / 2) + 'px');
+		
 		ma.droppable({
 			drop : function(event, ui) {
 				var m = new Meter(ui.draggable.data('energy'), '',
@@ -127,7 +140,20 @@ function createDropables(plan) {
 			hoverClass : 'meter_hover',
 			activeClass : 'meter_active',
 		});
-
+		ma.click(function(e){
+			if (plan.selectedMeter != undefined) {
+				var m = new Meter(plan.selectedMeter.data('energy'), '',
+						makehash(12), $(this).data('appliance_link'));
+				meterModeSelector(m, function(m) {
+					meters.push(m);
+					createDropables(plan);
+					plan.selectedMeter.click();
+					refreshMeters(plan);
+					
+				});
+			}
+			
+		});
 	}
 }
 
@@ -293,6 +319,18 @@ function refreshMeters(plan) {
 					accept : '#meter_' + energies_used[i].short_name,
 					hoverClass : 'meter_hover',
 					activeClass : 'meter_active',
+				});
+				mvdrop.click(function(e){
+					if (plan.selectedMeter != undefined) {
+						var m = new Meter(plan.selectedMeter.data('energy'), '',
+								makehash(12), null);
+						meterModeSelector(m, function(m) {
+							meters.push(m);
+							plan.selectedMeter.click();
+							refreshMeters(plan);
+						});
+					}
+					
 				});
 			}
 			c++;
