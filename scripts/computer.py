@@ -57,7 +57,7 @@ while (processor_energy == -1): #Intel sometimes return a 500 error. We just hav
 			else:
 				regex = "href=\"/products/([0-9]+)/.*?" + re.sub("[ ]+",".*?",modelstripped)
 
-				print regex
+
 				m2 = re.search(regex,content,re.I | re.M | re.S)
 				if m2:
 					pid =  m2.group(1)
