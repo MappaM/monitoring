@@ -18,6 +18,13 @@ function initialiseDraggableMeter(energies_used) {
 			} else {
 				if (plan.selectedMeter != undefined) return;
 				meter.css('backgroundColor',meter.data('energy').color);
+				
+				var currentColor = meter.css('backgroundColor');
+                var rgb = currentColor.match(/[ ]*([0-9]+)[ ]*,[ ]*([0-9]+)[ ]*,[ ]*([0-9]+)[ ]*/);
+                console.log(rgb);
+                var newColor = "rgba("+rgb[1]+","+rgb[2]+","+rgb[3]+",0.5)"
+                console.log(newColor);
+                meter.css('backgroundColor',newColor);
 				plan.selectedMeter = meter;
 			}
 		});})(meter));

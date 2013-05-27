@@ -17,7 +17,7 @@ if (len(sys.argv) != 1):
 	print 'Usage : python.py computer.py'
 	sys.exit(-1)
 
-verbose = True
+verbose = False
 energy = []
 
 def get_processor_name():
@@ -56,7 +56,7 @@ while (processor_energy == -1): #Intel sometimes return a 500 error. We just hav
 					print "Processor MAX TDP found on intel.com : %f" % processor_energy
 			else:
 				regex = "href=\"/products/([0-9]+)/" + re.sub("[ ]+",".*?",modelstripped)
-				print content
+
 				m2 = re.search(regex,content,re.I | re.M | re.S)
 				if m2:
 					pid =  m2.group(1)
@@ -76,7 +76,6 @@ while (processor_energy == -1): #Intel sometimes return a 500 error. We just hav
 				print "Processor manufacturer unknow, assuming MAX TDP 65Watt"
 			processor_energy = 65
 	except urllib2.HTTPError:
-		print "err"
 		processor_energy = -1;
 
 #Hard drives
@@ -123,6 +122,8 @@ for line in all_info.split("\n"):
 	elif "renderer string" in line:
             card = re.sub( ".*renderer string.*: ", "", line,1)
 
+
+
 if "NVIDIA" in vendor:
 	card = re.search( "^([a-z0-9 ]+)", card, re.I ).group(1)
 	
@@ -151,7 +152,15 @@ if "NVIDIA" in vendor:
 	gc = gpu * load
 	print "Your gpu has a load of %f, assuming %d Watts " % (load,gc)
 
-	#" nvidia-smi -q -d MEMORY "
+	all_info = subprocess.check_output("glxinfo", shell=True).strip()
+	vendor = ""
+	card = ""
+	for line in all_info.split("\n"):
+		if "vendor string" in line:
+		        vendor = re.sub( ".*vendor string.*: ", "", line,1)
+		elif "renderer string" in line:
+		        card = re.sub( ".*renderer string.*: ", "", line,1)
+
 else:
 	#Vendor could not be found or internal chipset, assuming internal chipset (not much consumption)
 	gc = 2 if (mobile) else 5

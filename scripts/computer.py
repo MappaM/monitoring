@@ -17,7 +17,7 @@ if (len(sys.argv) != 1):
 	print 'Usage : python.py computer.py'
 	sys.exit(-1)
 
-verbose = True
+verbose = False
 energy = []
 
 def get_processor_name():
@@ -56,7 +56,7 @@ while (processor_energy == -1): #Intel sometimes return a 500 error. We just hav
 					print "Processor MAX TDP found on intel.com : %f" % processor_energy
 			else:
 				regex = "href=\"/products/([0-9]+)/.*?" + re.sub("[ ]+",".*?",modelstripped)
-				print content
+
 				print regex
 				m2 = re.search(regex,content,re.I | re.M | re.S)
 				if m2:
@@ -123,6 +123,8 @@ for line in all_info.split("\n"):
 	elif "renderer string" in line:
             card = re.sub( ".*renderer string.*: ", "", line,1)
 
+
+
 if "NVIDIA" in vendor:
 	card = re.search( "^([a-z0-9 ]+)", card, re.I ).group(1)
 	
@@ -149,9 +151,18 @@ if "NVIDIA" in vendor:
 
 	#For now we assume cpu load for gpu
 	gc = gpu * load
-	print "Your gpu has a load of %f, assuming %d Watts " % (load,gc)
+	if verbose:
+		print "Your gpu has a load of %f, assuming %d Watts " % (load,gc)
 
-	#" nvidia-smi -q -d MEMORY "
+	all_info = subprocess.check_output("glxinfo", shell=True).strip()
+	vendor = ""
+	card = ""
+	for line in all_info.split("\n"):
+		if "vendor string" in line:
+		        vendor = re.sub( ".*vendor string.*: ", "", line,1)
+		elif "renderer string" in line:
+		        card = re.sub( ".*renderer string.*: ", "", line,1)
+
 else:
 	#Vendor could not be found or internal chipset, assuming internal chipset (not much consumption)
 	gc = 2 if (mobile) else 5
@@ -184,4 +195,4 @@ somme = numpy.array(energy).sum()
 #Average power conversion efficiency: 80%, and 1 watt base
 somme = somme / 0.8 + 1
 
-print somme
+print somme / 1000
