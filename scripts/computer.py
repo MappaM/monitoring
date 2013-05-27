@@ -33,22 +33,18 @@ mobile = 0
 model = get_processor_name()
 if (re.search( "intel", model,re.I)):
 
-	model = re.sub( "\(r\)|\(tm\)|intel|[@][ ]?[0-9]+.[0-9]+[kmghz]+|cpu|celeron|\t", " ", model,0,re.I)
+	model = re.sub( "\(r\)|\(tm\)|intel|[@][ ]?[0-9]+.[0-9]+[kmghz]+|cpu|celeron|\t", " ", model,0,re.I).rstrip()
 	print "Intel processor detected : " + model
-	url = "http://www.intel.eu/content/www/eu/en/search.html?&allwords="+re.sub("[ ]+","+",model)
+	url = "http://ark.intel.com/search?q="+re.sub("[ ]+","+",model)
 	content = urllib2.urlopen(url).read()
-	m = re.search("(http://www.intel.com/support/processors/.*?)\"",content,re.I | re.M)
-
-	if m:
-		url2 =  m.group(1)
-		#Intel has mobile in the path for most mobile architecture. Quite convenient...
-		mobile = not (re.search("mobile",url2) == None)
-		if mobile:
-			print "You processor is for mobile computer. Assuming laptop mode"
-		content2 = urllib2.urlopen(url2).read()
+	tdp = re.search("([0-9]+) W",content,re.I | re.M)
+	if tdp:
+		processor_energy = float(tdp.group(1))
+		print "Processor MAX TDP found on intel.com : %f" % processor_energy
+	else:
 		regex = "href=\"http://ark.intel.com/Product.aspx\?id=([0-9]+)" + re.sub("[ ]+",".*?",model)
 		print regex
-		m2 = re.search(regex,content2,re.I | re.M | re.S)
+		m2 = re.search(regex,content,re.I | re.M | re.S)
 		if m2:
 			pid =  m2.group(1)
 			content3 = urllib2.urlopen("http://ark.intel.com/products/"+pid+"/").read()
@@ -57,11 +53,9 @@ if (re.search( "intel", model,re.I)):
 				processor_energy = float(m3.group(1))
 				print "Processor MAX TDP found on intel.com : %f" % processor_energy
 		else:
-			print "Processor model could not be find in intel list , assuming MAX TDP 65Watt"
+			print "Processor model could not be find on intel.com, assuming MAX TDP 65Watt"
 			processor_energy = 65
-	else:
-		print "Research on intel.com not successfull, assuming MAX TDP 65Watt"
-		processor_energy = 65
+	
 else:
 	print "Processour manufcaturer unknow, assuming MAX TDP 65Watt"
 	processor_energy = 65
