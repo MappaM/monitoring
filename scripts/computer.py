@@ -57,7 +57,7 @@ while (processor_energy == -1): #Intel sometimes return a 500 error. We just hav
 			else:
 				regex = "href=\"/products/([0-9]+)/.*?" + re.sub("[ ]+",".*?",modelstripped)
 
-
+				print regex
 				m2 = re.search(regex,content,re.I | re.M | re.S)
 				if m2:
 					pid =  m2.group(1)
@@ -114,22 +114,14 @@ else:
 	energy.append(20)
 
 #Graphic card
-all_info = subprocess.check_output("glxinfo", shell=True).strip()
-vendor = ""
-card = ""
-for line in all_info.split("\n"):
-	if "vendor string" in line:
-            vendor = re.sub( ".*vendor string.*: ", "", line,1)
-	elif "renderer string" in line:
-            card = re.sub( ".*renderer string.*: ", "", line,1)
+card = subprocess.check_output("lspci | grep -i vga", shell=True).strip()
 
+if "nvidia" in card.lower():
+	card = re.search( ".*:([a-z0-9 \[\]]+)", card, re.I ).group(1)
 
-
-if "NVIDIA" in vendor:
-	card = re.search( "^([a-z0-9 ]+)", card, re.I ).group(1)
-	
 	newcard = re.search("([0-9]{3,4})(M)?",card,re.I)
 	mobilegpu = newcard.group(2)
+
 	if mobilegpu:
 		gpumin = 10
 		gpumax = 100
