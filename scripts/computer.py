@@ -18,7 +18,7 @@ if (len(sys.argv) != 1):
 	print 'Usage : python.py computer.py'
 	sys.exit(-1)
 
-verbose = False
+verbose = True
 energy = []
 
 def get_processor_name():
@@ -79,6 +79,12 @@ while (processor_energy == -1): #Intel sometimes return a 500 error. We just hav
 	except urllib2.HTTPError:
 		processor_energy = -1;
 
+#---Processor load
+load = (os.getloadavg()[2])/multiprocessing.cpu_count()
+if verbose:
+	print "Your system load is %.2f" % load
+energy.append(processor_energy * (load/2 + 0.5))
+
 #Hard drives
 all_info = subprocess.check_output("ls /dev/sd[a-z]", shell=True).strip()
 for drive in all_info.split("\n"):
@@ -96,20 +102,17 @@ for drive in all_info.split("\n"):
 			if mobile:	
 				if verbose:		
 					print "HDD Detected. Assuming 2Watt"
-				energy.append(2)
+				p = 2
 			else:
 				if verbose:
-					print "HDD Detected. Assuming 7Watt"
-				energy.append(7)
+					print "HDD Detected. Assuming 6Watt"
+				p = 6
+			energy.append(p * (load/2 + 0.5))
 	except subprocess.CalledProcessError:
 		#An error could appear if it's not really a disk, like a usb stick or cdrom, we count 0.5W for these
 		energy.append(0.5)
 
-#---Processor load
-load = (os.getloadavg()[2])/multiprocessing.cpu_count()
-if verbose:
-	print "Your system load is %.2f" % load
-energy.append(processor_energy * (load/2 + 0.5))
+
 
 #Motherboard
 if (mobile):
@@ -163,7 +166,7 @@ else:
 	#Vendor could not be found or internal chipset, assuming internal chipset (not much consumption)
 	gc = 2 if (mobile) else 5
 	if verbose:
-		print "Vendor of graphic card could not be found or internal chipset, assuming %d Watt"
+		print "Vendor of graphic card could not be found or internal chipset, assuming %d Watt" % gc
 	
 energy.append(gc)
 
