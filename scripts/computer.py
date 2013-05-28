@@ -18,7 +18,7 @@ if (len(sys.argv) != 1):
 	print 'Usage : python.py computer.py'
 	sys.exit(-1)
 
-verbose = True
+verbose = False
 energy = []
 
 def get_processor_name():
