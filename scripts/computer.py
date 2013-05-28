@@ -12,6 +12,7 @@ import urllib2
 import multiprocessing
 import psi
 import numpy
+
 from math import log
 if (len(sys.argv) != 1):
 	print 'Usage : python.py computer.py'
@@ -39,7 +40,6 @@ if (mobile):
 model = get_processor_name()
 processor_energy = -1
 while (processor_energy == -1): #Intel sometimes return a 500 error. We just have to retry 5 to 10 times...
-
 	try:
 		if (re.search( "intel", model, re.I)):		
 			modelstripped = re.sub( "\(r\)|\(tm\)|intel|[@][ ]?[0-9]+.[0-9]+[kmghz]+|cpu|celeron|\t", " ", model,0,re.I).strip()
@@ -57,7 +57,7 @@ while (processor_energy == -1): #Intel sometimes return a 500 error. We just hav
 			else:
 				regex = "href=\"/products/([0-9]+)/.*?" + re.sub("[ ]+",".*?",modelstripped)
 
-				print regex
+#				print regex
 				m2 = re.search(regex,content,re.I | re.M | re.S)
 				if m2:
 					pid =  m2.group(1)
@@ -82,24 +82,28 @@ while (processor_energy == -1): #Intel sometimes return a 500 error. We just hav
 #Hard drives
 all_info = subprocess.check_output("ls /dev/sd[a-z]", shell=True).strip()
 for drive in all_info.split("\n"):
-	dev_info = subprocess.check_output("hdparm -I " + drive, shell=True).strip()
-	ssd = False
-	for hi in dev_info.split("\n"):
-		if "Solid State Device" in hi:
-			ssd = True
-	if ssd:
-		if verbose:
-			print "SSD Detected. Assuming 0.8Watt"
-		energy.append(0.8)
-	else:
-		if mobile:	
-			if verbose:		
-				print "HDD Detected. Assuming 2Watt"
-			energy.append(2)
-		else:
+	try:
+		dev_info = subprocess.check_output("hdparm -I " + drive, shell=True).strip()
+		ssd = False
+		for hi in dev_info.split("\n"):
+			if "Solid State Device" in hi:
+				ssd = True
+		if ssd:
 			if verbose:
-				print "HDD Detected. Assuming 7Watt"
-			energy.append(7)
+				print "SSD Detected. Assuming 0.8Watt"
+			energy.append(0.8)
+		else:
+			if mobile:	
+				if verbose:		
+					print "HDD Detected. Assuming 2Watt"
+				energy.append(2)
+			else:
+				if verbose:
+					print "HDD Detected. Assuming 7Watt"
+				energy.append(7)
+	except subprocess.CalledProcessError:
+		#An error could appear if it's not really a disk, like a usb stick or cdrom, we count 0.5W for these
+		energy.append(0.5)
 
 #---Processor load
 load = (os.getloadavg()[2])/multiprocessing.cpu_count()
