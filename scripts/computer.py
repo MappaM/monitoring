@@ -92,7 +92,9 @@ except: #Cannot access xset if no display, assuming on...
 		mon = 3
 	else:
 		mon = 8
-
+	if verbose:
+			print "Monitor is probably On. Assuling %dWatt" % mon
+			
 #Graphic card
 card = subprocess.check_output("lspci | grep -i vga", shell=True).strip()
 
