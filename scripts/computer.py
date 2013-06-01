@@ -76,13 +76,13 @@ for slot in memory_slots.split("\n"):
 	nslot += 1
 	mem = re.search("([0-9]+)",slot,re.I)
 	if (mem):
-		memcons = (float(mem.group(0)) / 1024) * 2
+		memcons = (float(mem.group(0)) / 1024) * (1 if (mobile) else 2)
 		energy.append(memcons)
 		if verbose:
 			print "Memory of %d detected. Assuming %fWatt" % (int(mem.group(1)), memcons)
 
 if (mobile):
-	energy.append(10)
+	energy.append(8)
 elif nslot <= 2:
 	energy.append(20)
 else:
@@ -148,7 +148,7 @@ if "nvidia" in card.lower():
 		print "Your gpu has a load of %f, assuming %f Watts " % (gpuload,gc)
 else:
 	#Vendor could not be found or internal chipset, assuming internal chipset (not much consumption)
-	gc = 2 if (mobile) else 5
+	gc = 1.5 if (mobile) else 3
 	if verbose:
 		print "Vendor of graphic card could not be found or internal chipset, assuming %d Watt" % gc
 	
