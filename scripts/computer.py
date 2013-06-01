@@ -29,7 +29,7 @@ def get_processor_name():
 
 
 #Laptop or desktop? If laptop, there's a lid...
-mobile =  os.path.exists("/proc/acpi/button/lid/")
+mobile =  os.path.exists("/proc/acpi/button/lid/") or "Celeron" in get_processor_name()
 if (mobile):
 	if verbose:
 		print "You appear to be on a laptop"
@@ -208,7 +208,7 @@ print numpy.array(energy).sum()
 		
 #TDP to real consumption conversion
 if (mobile):
-	processor_energy = processor_energy * 0.6
+	processor_energy = processor_energy * 0.55
 else:
 	processor_energy = processor_energy * 0.75
 
