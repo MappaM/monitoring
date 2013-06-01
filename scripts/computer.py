@@ -1,33 +1,31 @@
 #!/bin/python
-
-#dependency  pywapi psi pysensors 
+# Return the approximated consumption of a computer where the interface is running on
+#python dependency  : pywapi psi pysensors 
 #program dependency hdparm nvidia-smi if nvidia
 
-import pywapi
 import sys
-import datetime
-import random
-import os, platform, subprocess, re
+import os, subprocess, re
 import urllib2
 import multiprocessing
-import psi
 import numpy
+from math import log,exp
+import psutil
 
-from math import log
+
 if (len(sys.argv) != 1):
 	print 'Usage : python.py computer.py'
 	sys.exit(-1)
 
-verbose = False
+verbose = True
 energy = []
 
 def get_processor_name():
-    command = "cat /proc/cpuinfo"
-    all_info = subprocess.check_output(command, shell=True).strip()
-    for line in all_info.split("\n"):
-        if "model name" in line:
-            return re.sub( ".*model name.*:", "", line,1)
-    return ""
+	command = "cat /proc/cpuinfo"
+	all_info = subprocess.check_output(command, shell=True).strip()
+	for line in all_info.split("\n"):
+		if "model name" in line:
+			return re.sub( ".*model name.*:", "", line,1)
+	return ""
 
 
 #Laptop or desktop? If laptop, there's a lid...
@@ -80,9 +78,14 @@ while (processor_energy == -1): #Intel sometimes return a 500 error. We just hav
 		processor_energy = -1;
 
 #---Processor load
-load = (os.getloadavg()[2])/multiprocessing.cpu_count()
+load = (psutil.cpu_percent()/100)
+loadexp = (load * load * load)
 if verbose:
 	print "Your system load is %.2f" % load
+	
+#Mobile processor seems to never achieve their max TDP
+if (mobile):
+	processor_energy = processor_energy * 0.75
 energy.append(processor_energy * (load/2 + 0.5))
 
 #Hard drives
@@ -114,7 +117,7 @@ for drive in all_info.split("\n"):
 
 
 
-#Motherboard
+#Motherboard and laptop screen
 if (mobile):
 	energy.append(8)
 else:
@@ -129,11 +132,12 @@ if "nvidia" in card.lower():
 	newcard = re.search("([0-9]{3,4})(M)?",card,re.I)
 	mobilegpu = newcard.group(2)
 
+	#Searching the max TDP according to the gamme
 	if mobilegpu:
-		gpumin = 10
-		gpumax = 100
+		gpumin = 5    
+		gpumax = 80
 	else:
-		gpumin = 25
+		gpumin = 20
 		gpumax = 250
 
 	model = int(newcard.group(1))
@@ -148,26 +152,20 @@ if "nvidia" in card.lower():
 	#Load is exponential with gamme
 	gpu = gpumin + ((1-(log(11-rangeingamme)/log(11))) * (gpumax-gpumin))
 
-	#For now we assume cpu load for gpu
-	gc = gpu * load
+	#For now we assume cpu loadexp for gpu
+	gc = gpu * loadexp
+	
+	
 	if verbose:
 		print "Your gpu has a load of %f, assuming %d Watts " % (load,gc)
-
-	all_info = subprocess.check_output("glxinfo", shell=True).strip()
-	vendor = ""
-	card = ""
-	for line in all_info.split("\n"):
-		if "vendor string" in line:
-		        vendor = re.sub( ".*vendor string.*: ", "", line,1)
-		elif "renderer string" in line:
-		        card = re.sub( ".*renderer string.*: ", "", line,1)
-
 else:
 	#Vendor could not be found or internal chipset, assuming internal chipset (not much consumption)
 	gc = 2 if (mobile) else 5
 	if verbose:
 		print "Vendor of graphic card could not be found or internal chipset, assuming %d Watt" % gc
 	
+#Like CPU, mobile GPu never achieve MAX TDP
+gc = gc * 0.75
 energy.append(gc)
 
 #Fans
@@ -175,8 +173,8 @@ nfan = 0
 command = "cat /sys/class/thermal/cooling_device*/cur_state"
 all_info = subprocess.check_output(command, shell=True).strip()
 for line in all_info.split("\n"):
-    if (float(line) >= 1):
-	 nfan += 1;
+	if (float(line) >= 1):
+		nfan += 1;
 
 if (mobile and nfan==0):
 	nfan = 1
@@ -191,7 +189,10 @@ if verbose:
 #Calculating sum
 somme = numpy.array(energy).sum()
 
-#Average power conversion efficiency: 80%, and 1 watt base
-somme = somme / 0.8 + 1
+#Average power conversion efficiency
+if mobile:
+	somme = somme / 0.95 + 0.5
+else:
+	somme = somme / 0.8 + 1
 
 print somme / 1000

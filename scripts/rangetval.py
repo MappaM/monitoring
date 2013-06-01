@@ -1,9 +1,10 @@
 #!/bin/python
+# Get a value from the server and adds a random value around base_value to it
 
-import pywapi
 import sys
 import datetime
 import random
+import ranval
 
 if (len(sys.argv) != 4):
 	print 'Usage : python.py rangetval.py HOST HASH BASE_VALUE'
@@ -23,6 +24,6 @@ startval = float(sys.argv[3])
 
 temps = datetime.datetime.now()
 hour = temps.hour
-mult = float((8 - min(abs(7-hour),abs(13-hour),abs(19-hour))) / float(4))
+mult = ranval.get_multiplier(hour)
 value = float(v) + float(float(startval) * mult * (float(random.random()) + float(0.5)))
 print value
