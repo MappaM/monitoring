@@ -16,7 +16,22 @@ Plan.prototype.save_appliances = function(callback,house_id,csrf_token) {
 		  success: function(v){windows_changed = false;if (callback != undefined) callback();},
 		  error:function(e){alert("Error when saving : " + e);},
 		});
-}
+};
+
+/**
+ * Redraw the appliances on the plan
+ * @param appliances_p The list of Appliance objects
+ */
+Plan.prototype.refreshAppliances = function(appliances_p) {
+	if (appliances_p == undefined) return;
+	for (var i=0; i<appliances_p.length; i++) {
+		var appliance = appliances_p[i];
+		if (i == this.selected_appliance)
+			this.renderer.drawAppliance(appliance,this.toolColor);
+		else
+			this.renderer.drawAppliance(appliance);
+	}
+};
 
 /**
  * Clear the list of appliances and set a permanent loading message
@@ -67,6 +82,16 @@ function displayApplianceTypes(appliances_types,plan) {
 	}	
 	plan.setApplianceType(0);
 }
+
+/**
+ * Return the appliance at a point on the plan
+ */
+Plan.prototype.getApplianceAt = function(point) {
+	for (var i = 0; i < this.appliances_links.length; i++) {
+		if (this.appliances_links[i].center.equals(point)) return i;
+	}
+	return -1;
+};
 
 /**
  * Change the category of the appliance list menu
@@ -188,18 +213,6 @@ for (var i = 0; i < energies.length; i ++) {
 	
 	energy_images[energies[i].short_name].src = '/static/img/symbols/'+energies[i].short_name+'.png';
 }
-/*energy_images.water = new Image();
-energy_images.water.onload = eimgLoaded;
-energy_images.water.src = '/static/img/symbols/water.png';
-
-energy_images.electric = new Image();
-energy_images.electric.onload = eimgLoaded;
-energy_images.electric.src = '/static/img/symbols/electric.png';
-
-energy_images.fuel = new Image();
-energy_images.fuel.onload = eimgLoaded;
-energy_images.fuel.src = '/static/img/symbols/fuel.png';*/
-
 
 /**
  * Add a new window in the list
@@ -242,4 +255,28 @@ function applianceVariablesSelector(appliance, values, callback) {
 	});
 	q.append(btn);
 	modal(q);
+}
+
+/**
+ * Load the list of appliances
+ * @param plan
+ */
+function loadAppliances(plan) {
+	$.ajax({url: '/builder/data/floor_'+ plan.floor_id +'/appliances/get',
+		success: function(v){
+			plan.appliances_links = jsonStripModel($.parseJSON(v));
+			plan.events.call('applianceLoaded', plan);
+			plan.refresh();
+		}
+	});
+};
+
+/**
+ * Register this plugin to a plan
+ * @param plan
+ */
+function registerAppliancePlugin(plan) {
+	plan.events.register("wallLoaded", loadAppliances);
+	plan.events.register("floorChanged", function(plan){plan.appliances_links = null;});
+	plan.events.register("refresh", function(plan){plan.refreshAppliances(plan.appliances_links);});
 }

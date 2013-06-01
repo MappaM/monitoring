@@ -23,7 +23,7 @@ AlertModel.prototype.getColor = function() {return this.color;};
 
 /**
  * AnalogMeter
- * Class to represent a meter (which has an analog output and no input). Extends Analog
+ * Class to represent a meter (which has an analog output and no input). Extends AlertModel
  * @param meter The meter it runs
  * @constructor
  **/
@@ -243,6 +243,9 @@ var Board=function(params) {
 	this.refresh();
 };
 
+/**
+ * Draw a model in a given container
+ */
 function getBlock (model,pos, onemeter, container) {
 
 	var sz = model.getSize();
@@ -319,6 +322,13 @@ function getBlock (model,pos, onemeter, container) {
 	return container;
 };
 
+/**
+ * Draw a piece and its descendant
+ * @param model Piece
+ * @param w Width
+ * @param h Height
+ * @returns {Number}
+ */
 Board.prototype.createSubtree = function (model,w,h) {
 	outputs = model.getOutputs();
 	var tch = 0;
@@ -364,6 +374,10 @@ Board.prototype.createSubtree = function (model,w,h) {
 	return tch;
 };
 
+
+/**
+ * Clean the board and redraw tje chain of pieces
+ */
 Board.prototype.refresh = function() {
 	this.canvas.html('');
 	this.createSubtree(this.analog,0,Math.floor(this.h/2));
@@ -439,8 +453,10 @@ function findMeterByPk(apk) {
 	return list;
 }
 
+/**
+ * Create an object extending AlertModel according to it's real type
+ */
 function unfoldPiece(model) {
-
 	var m;
 	if (model.model == 'ADC')
 		m = new ADC(model.type,model.params);
@@ -454,10 +470,14 @@ function unfoldPiece(model) {
 	return m;
 }
 
+/**
+ * Transform the anonymous chain to a chain of correct implemented AlertModel
+ * @param data 
+ * @returns {AnalogMeter}
+ */
 function unfoldJSON(data) {
 	
 	var model = $.parseJSON(data);
-	console.log(model);
 	var am = new AnalogMeter(model.meter);
 	for (var i = 0; i < model.outputs.length; i++)
 		am.addOutput(unfoldPiece(model.outputs[i]));
@@ -492,7 +512,6 @@ function changeBoard(meter,zone) {
 
 /**
  * Draw the droppables over all appliances and global meter on the plans
- * 
  */
 function drawCallers(plan) {
 	var w = $('#plans_container').width() / plans[0].l;
@@ -576,7 +595,7 @@ function multipleMeterSelector(meters, callback) {
 }
 
 /**
- * Draw the usables pieces 
+ * Draw the usables pieces in the menu
  */
 function initPieces() {
 	var models = new Array();

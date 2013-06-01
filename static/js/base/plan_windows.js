@@ -61,7 +61,7 @@ Plan.prototype.getWindowsIndexBetween = function(start,end) {
 		}
 	}
 	return indexes;
-}
+};
 
 /**
  * Delete all windows whose indexes are in the list. Indexes have to be ordered !
@@ -72,7 +72,7 @@ Plan.prototype.removeWindowsByIndex = function(index_list) {
 		var index = index_list[i];
 		this.removeWindowByIndex(index - i);
 	}
-}
+};
 
 /**
  * Return the window at some postion
@@ -88,7 +88,7 @@ Plan.prototype.getWindowAt = function(point) {
 		}
 	}
 	
-}
+};
 
 /**
  * Add a new window in the list
@@ -97,6 +97,40 @@ Plan.prototype.getWindowAt = function(point) {
 Plan.prototype.addWindow = function(window) {
 	this.windows.push(window);
 	this.windows_changed = true;
-}
+};
 
- 
+
+/**
+ * Redraw the windows on the plan
+ * @param windows_p The list of Window objects
+ */
+Plan.prototype.refreshWindows = function(windows_p) {
+	if (windows_p == undefined) return;
+	for (var i=0; i<windows_p.length; i++) {
+		var window = windows_p[i];
+		this.renderer.drawWindow(window);
+	}
+};
+
+/**
+ * Load the windows
+ */
+function loadWindows(plan) {
+	$.ajax(	{
+				url: '/builder/data/floor_'+ plan.floor_id +'/windows/get',
+				success: function(v){
+					plan.windows = jsonStripModel($.parseJSON(v));
+					plan.refresh();
+				},
+		  	});
+};
+
+/**
+ * Register this plugin to a plan
+ * @param plan
+ */
+function registerWindowPlugin(plan) {
+	plan.events.register("wallLoaded", loadWindows);
+	plan.events.register("floorChanged", function(plan){plan.windows = null;});
+	plan.events.register("refresh", function(plan){plan.refreshWindows(plan.windows);});
+}

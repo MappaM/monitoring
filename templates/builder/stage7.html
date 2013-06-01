@@ -14,6 +14,7 @@
 <script type="text/javascript">
 	
 		var grid_precision = 2;
+		
 		//Retrieving list of all energies
 		var energies = jsonStripModel({{energies|safe}});
 		
@@ -49,11 +50,18 @@
 		
 		//Retrieving list of consumable energies used in the house, and all state energies
 		var energies_used = jsonStripModel({{energies_used|safe}});
-		
+
+		//Retrieving meter list
 		var meters = jsonStripModel({{meters|safe}});		
-		var meter_modes = {{meter_modes|safe}};
 		
+		//Retrieving the list of modes that the meter can have
+		var meter_modes = {{meter_modes|safe}};	
 		
+		function reloadMeters(plan) {
+			if (plan.walls == undefined) return;
+			createDropables(plan);
+			refreshMeters(plan);
+		}	
 		
 		$(document).ready(function(){
 			//Creating meter deleter
@@ -68,26 +76,21 @@
 			activeClass : 'meter_active',
 			});
 			
+			plan = new Plan({{plan_data}});
+			registerWallPlugin(plan);
+			registerWindowPlugin(plan);
+			registerAppliancePlugin(plan);
+			registerMeterPlugin(plan);
 			
+			$(window).resize(function(){reloadMeters(plan)});
 			
-			function reloadMeters(plan) {
-				if (plan.walls == undefined) return;
-				createDropables(plan);
-				refreshMeters(plan);
-			}	
+			plan.events.register('applianceLoaded',reloadMeters);
+			plan.events.register('resized',reloadMeters);
+
+			plan.createMeter = createMeter;
+			plan.meterSize = 2;
+			initialiseDraggableMeter(energies_used);
 			
-			function init() {			
-				$(window).resize(function(){reloadMeters(plan)});
-				plan.events.register('applianceLoaded',reloadMeters);
-				plan.events.register('resized',reloadMeters);
-				plan.createMeter = createMeter;
-				plan.meterSize = 2;
-				initialiseDraggableMeter(energies_used);
-			}
-			if (plan == undefined)
-				$(document).ready(init);
-			else
-				init();
 			var scrolled= false;
 			
 		});

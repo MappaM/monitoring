@@ -256,19 +256,28 @@ def appliances_types_get(request, cat):
 def stage7(request):
     house = shortcuts.get_object_or_404(House, id=request.session['house'])
     meterForm = forms.MeterForm(initial = {'house': house.pk})
-    floors = Floor.objects.filter(house=house)
-    minCorner,maxCorner = house.getDimension();  
-    e = list(house.getEnergies());
+    minCorner,maxCorner = house.getDimension()  
     context = { 'house_id':house.pk,
                 'house':house.pk,
                 'floor_types':Floor.FLOOR,
                 'floors':serializers.serialize("json", Floor.objects.filter(house = house),use_natural_keys=True),
                 'house':house,
-                'meters':serializers.serialize("json", Meter.objects.filter(house = house),use_natural_keys=True,relations={'energy':(),'appliance_link':{'relations':{'center':(),'appliance':{'relations':('energies',)}}}}),
-                'energies_used_o':e,
-                'energies_used':serializers.serialize("json",e),
-                'energies':serializers.serialize("json",Energy.objects.all()),
+                'meters':serializers.serialize("json", 
+                                               Meter.objects.filter(house = house),
+                                               use_natural_keys=True,
+                                               relations={
+                                                          'energy':(),
+                                                          'appliance_link':
+                                                          {
+                                                            'relations':
+                                                            {
+                                                                'center':(),
+                                                                'appliance':
+                                                                {
+                                                                    'relations':('energies',)}}}}),
                 'meter_modes':json.JSONEncoder().encode(Meter.MODES),
+                'energies_used':serializers.serialize("json",list(house.getEnergies())),
+                'energies':serializers.serialize("json",Energy.objects.all()),                
                 'plan_data':'{onemeter_min:35,    precision:0, length:' + str(maxCorner.x - minCorner.x + 4) + ', width:' + str(maxCorner.y - minCorner.y + 6) + ',offsetX:' + str(minCorner.x - 2) + ', offsetY:' + str(minCorner.y - 4) + ', draw_grid:false,onemeter_max:76}',
                 'form':meterForm,
                 'title':'Meter',

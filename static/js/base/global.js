@@ -13,23 +13,33 @@ Array.prototype.removeEquals = function(obj) {
 };
 
 
+/**
+ * Change the selected house and redirect to that page
+ * @param id Id of the new house
+ */
 function houseChoose(id) {
 		if (id == '-1') return;
 	if (id == '') {
 		
 		$.ajax({
 			url:'/select_house/',
-			success:function(data){window.location.href = '/builder/';},
+			success:function(data){window.location.href = '/builder/';}
 		});
 	} else {
 		$.ajax({
 			url:'/select_house/'+id,
-			success:function(data){window.location.reload();},
+			success:function(data){window.location.reload();}
 		});
 		
 	}
 }
 
+
+/**
+ * Clone a nobject
+ * @param obj The object to clone
+ * @returns A copy of this object
+ */
 function clone(obj) {
     if (null == obj || "object" != typeof obj) return obj;
     var copy = obj.constructor();
@@ -105,7 +115,6 @@ $(document).ready(function(){
  * @returns Array of javascript objects
  */
 function jsonStripModel(model) {
-	
 	var ar = new Array();
 	if (model == undefined) return ar;
 	

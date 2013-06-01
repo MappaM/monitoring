@@ -106,7 +106,8 @@ function meterModeSelector(meter, callback) {
 
 function createDropables(plan) {
 	plan.canvas.parent().find('.meter_drop').remove();
-
+	
+	if (plan.appliances_links == undefined) return;
 	for ( var i = 0; i < plan.appliances_links.length; i++) {
 		var a = plan.appliances_links[i];
 
@@ -548,4 +549,31 @@ Plan.prototype.save_meters = function(callback, house_id, csrf_token) {
 			alert("Error when saving : " + e);
 		},
 	});
+};
+
+
+
+
+/**
+ * Load the list of meters
+ * @param plan
+ */
+function loadAppliances(plan) {
+	$.ajax({url: '/builder/data/floor_'+ plan.floor_id +'/appliances/get',
+		success: function(v){
+			plan.appliances_links = jsonStripModel($.parseJSON(v));
+			plan.events.call('applianceLoaded', plan);
+			plan.refresh();
+		}
+	});
+};
+
+/**
+ * Register this plugin to a plan
+ * @param plan
+ */
+function registerMeterPlugin(plan) {
+	//plan.events.register("wallLoaded", loadAppliances);
+	//plan.events.register("floorChanged", function(plan){plan.appliances_links = null;});
+	plan.events.register("refresh", refreshMetersDecoration);
 }

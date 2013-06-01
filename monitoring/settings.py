@@ -234,7 +234,7 @@ PIPELINE_JS = {
         },
     'plan': {
              'source_filenames': (
-                                  'js/jquery.smartresize.js',
+                    'js/jquery.smartresize.js',
                     'js/base/renderer.js',
                     'js/base/plan.js',
                     'js/base/plan_walls.js',
@@ -278,3 +278,5 @@ PIPELINE_JS = {
 }
 
 MAIL_FROM = "tom.barbette@student.ulg.ac.be"
+
+AUTH_PROFILE_MODULE = "main.Profile"

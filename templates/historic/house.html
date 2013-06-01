@@ -64,7 +64,7 @@
 										valueDecimals: 2,
 					                    valueSuffix: 'kWh',
 					                    useHTML:true,
-					                    shared:true,
+					                    shared:true
 					                }
 						});
 						
@@ -79,13 +79,12 @@
 				                       useHTML:true,
 				                       style: {
 				                           color: '#555555'
-				                       },
+				                       }
 				                   },
 				                   title: {
-				                       text: 'Lower Heat of Combustion',
+				                       text: 'Lower Heat of Combustion'
 				                       
-				                   }
-				               	
+				                   }				               	
 				            	}];
 				} else if (mode == 'price') {
 					tot_unit = '€';
@@ -118,7 +117,7 @@
 										valueDecimals: 2,
 					                    valueSuffix: '€',
 					                    useHTML:true,
-					                    shared:true,
+					                    shared:true
 					                }
 						});
 						
@@ -133,10 +132,10 @@
 				                       useHTML:true,
 				                       style: {
 				                           color: '#555555'
-				                       },
+				                       }
 				                   },
 				                   title: {
-				                       text: 'Cost',
+				                       text: 'Cost'
 				                       
 				                   }
 				               	
@@ -156,7 +155,7 @@
 								valueDecimals: 2,
 			                    valueSuffix: ' {{m.energy.unit|safe}}'.replace('&deg;','°'),
 			                    useHTML:true,
-			                    shared:true,
+			                    shared:true
 			                }
 						}{% if not forloop.last %},{% endif %}
 						{% endfor %}
@@ -169,7 +168,7 @@
 			    		total.push({
 			    			name : '{{m.energy.title}}',
 							color:'{{m.energy.color}}',
-							y:sum,
+							y:sum
 							
 			    		});
 			    	{% endfor %}
@@ -193,7 +192,7 @@
 			        yAxis:yAxis,
 			        tooltip: {
 		                shared: true,
-		                borderColor:'#1A5213',
+		                borderColor:'#1A5213'
 		                
 		            },
 			               
@@ -207,7 +206,7 @@
 			    new Highcharts.Chart({
 			      	chart: {
 			      		renderTo: 'year_tot',
-			      		plotBackgroundColor: null,
+			      		plotBackgroundColor: null
 			      	},
 			        title: {
 			            text: 'Past year '+(mode=='price'?'expenses':'consumption'),
@@ -215,7 +214,7 @@
 			        },
 			        tooltip: {
 		                shared: true,
-		                borderColor:'#1A5213',
+		                borderColor:'#1A5213'
 		            },
 			        series : [
 			             {
@@ -227,7 +226,7 @@
 								valueDecimals: 2,
 			                    valueSuffix: tot_unit,
 			                    useHTML:true,
-			                    shared:true,
+			                    shared:true
 			                }
 							
 						}
@@ -268,22 +267,22 @@
 				    		states: {
 				    			hover: {
 				    				fill: 'white',
-				    				stroke:'#1A5213',
+				    				stroke:'#1A5213'
 				    			},
 				    			select: {
 				    				style: {
-				    					color: 'white',
+				    					color: 'white'
 				    				},
 				    				stroke: '#1A5213',
-				    				fill:'#1A5213',
+				    				fill:'#1A5213'
 				    				
 				    			}
 				    		}
-				    	},
+				    	}
 			        },
 			        tooltip: {
 		                shared: true,
-		                borderColor:'#1A5213',
+		                borderColor:'#1A5213'
 		            },
 		            navigator: {
 	                    series: {
@@ -315,14 +314,14 @@
 			                       style: {
 			                           color: '#555555'
 			                       },
-			                       x:{% cycle '45' '-45' %},
+			                       x:{% cycle '45' '-45' %}
 			                   },
 			                   title: {
 			                       text: '{{m.energy.title}}',
 			                       style: {
 			                           color: '{{m.energy.color}}'
 			                       },
-			                   margin: 50 ,
+			                   margin: 50 
 			                   },
 			               	
 			                   opposite:{% cycle 'true' 'false' %} 
@@ -340,10 +339,10 @@
 							tooltip: {
 								valueDecimals: 2,
 			                    valueSuffix: ' {{m.energy.unit|safe}}'.replace('&deg;','°'),
-			                    useHTML:true,
+			                    useHTML:true
 			                },
 			                marker:{
-			                	enabled:data[{{forloop.counter0}}].length < 2,
+			                	enabled:data[{{forloop.counter0}}].length < 2
 			                },
 				        	yAxis: {{forloop.counter0}}
 						}{% if not forloop.last %},{% endif %}
@@ -351,7 +350,7 @@
 						
 					],
 					xAxis:[ {ordinal: false
-		            }],
+		            }]
 			    });
 			    chart = overall.highcharts();
 			    for (var i = 0; i < chart.yAxis.length; i++) {

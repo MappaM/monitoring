@@ -35,7 +35,7 @@
 			plan.refresh();
 		}
 		
-		function grid_click(e) {			
+		function grid_click(plan) {			
 			if ($('#tool:checked').val() == 'wall') {
 				if (plan.start != null && plan.cursor.x == plan.start.x && plan.cursor.y == plan.start.y) {
 					plan.start = undefined;
@@ -118,8 +118,17 @@
 		}
 		
 		$(document).ready(function(){
+			plan = new Plan({	length:{{house.length}},
+								width:{{house.width}},
+								{{plan_params}}
+							});
+			registerWallPlugin(plan);
+			registerWindowPlugin(plan);
+			
 			plan.events.register('stateChanged',stateChanged);
 			plan.events.register('wallLoaded',copyWalls);
+			plan.events.register('click',grid_click);
+			
 		});
 		
 	</script>

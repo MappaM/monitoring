@@ -163,3 +163,16 @@ Renderer2D.prototype.link = function(a,b,color,width) {
 	 this.ctx.strokeStyle=color;
 	 this.ctx.stroke();
 };
+
+/**
+ * Clear the content of the drawing zone
+ */
+Renderer2D.prototype.clear = function() {
+	this.ctx.clearRect(0,0,this.pl + 1,this.pw + 1);
+	
+	if (/android/.test(navigator.userAgent.toLowerCase()) && !/chrome/.test(navigator.userAgent.toLowerCase())) {
+		this.ctx.fillStyle = "rgba(255, 255, 255, 1)";	
+		this.ctx.width = this.ctx.width;
+		this.ctx.fillRect (0, 0, this.pl + 1, this.pw + 1);
+	}
+};

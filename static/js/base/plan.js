@@ -1,5 +1,5 @@
 /**
- * Initialise a new Plan managarer
+ * Initialize a new Plan manager
  * @param params object of parameters
  */
 function Plan(params) {
@@ -12,15 +12,12 @@ function Plan(params) {
 	if (params.canvas == undefined)
 		params.canvas = $('#plan');		
 	this.canvas = params.canvas;
-	if (params.draw_grid != undefined)
-		this.draw_grid = params.draw_grid;
-	else
-		this.draw_grid = true;
 	
 	//-------------------
 	// Parameters
 	//-------------------	
 	this.displayLabels = false;
+	if (params.draw_grid != undefined) this.draw_grid = params.draw_grid; else this.draw_grid = true;
 	if (params.display_global_meters != undefined) this.display_global_meters = params.display_global_meters; else this.display_global_meters = 2;
 	if (params.meterSize != undefined) this.meterSize = params.meterSize; else this.meterSize = 2;
 	if (params.onemeter_max != undefined) this.onemeter_max = params.onemeter_max; else this.onemeter_max = 100;
@@ -73,14 +70,15 @@ function Plan(params) {
 	//-------------------
 	// Events
 	//-------------------
-	this.events = new EventManager();
+	this.events = new EventManager(this);
 	
 	//Old version compatibility
-	if (typeof grid_click == 'function')
-		this.canvas.click(grid_click);
 	if (typeof getCurrentTool != 'function')
 		getCurrentTool = function(){return '';};
 
+	//-------------------
+	// Movement of mouse and click
+	//-------------------
 	var plan = this;
 	if (this.enable_mouse) {
 		this.canvas.bind('mousemove',function(e) {
@@ -98,7 +96,16 @@ function Plan(params) {
 		plan.cursor=undefined;
 		plan.tool = 'blank';
 	});		
+	this.canvas.click(function(){
+		plan.events.call("click");
+	});	
 
+	//-------------------
+	// Keyboard listener
+	//-------------------
+	
+	//Variable incremented when the users type "N", used to switch items, orientations, etc...
+	this.items_next = 0;
 	if (this.enable_keys)
 		document.onkeydown = function(event) {
 			if (event.keyCode == 78) {
@@ -114,13 +121,12 @@ function Plan(params) {
 				if (typeof(setToolByKey) == "function")
 					setToolByKey(event);
 			}
-		};
-
-	
+		};	
+		
+	//-------------------
+	// Size management
+	//-------------------	
 	this.autoresize = true;
-	
-	//Variable incremented when the users type "N", used to switch items, orientations, etc...
-	this.items_next = 0;
 
 	this.resize = function() {
 		if (this.beforeResize != undefined) this.beforeResize(this);
@@ -163,30 +169,13 @@ function Plan(params) {
 }	
 
 /**
- * Return the appliance at a point on the plan
- */
-Plan.prototype.getApplianceAt = function(point) {
-	for (var i = 0; i < this.appliances_links.length; i++) {
-		if (this.appliances_links[i].center.equals(point)) return i;
-	}
-	return -1;
-};
-
-
-/**
  * Redraw the plan
  */
 Plan.prototype.refresh = function () {
 	console.log("Refreshing plan...");
 	
 	//Cleaning canvas
-	this.ctx.clearRect(0,0,this.pl + 1,this.pw + 1);
-	
-	if (/android/.test(navigator.userAgent.toLowerCase()) && !/chrome/.test(navigator.userAgent.toLowerCase())) {
-		this.ctx.fillStyle = "rgba(255, 255, 255, 1)";	
-		this.ctx.width = this.ctx.width;
-		this.ctx.fillRect (0, 0, this.pl + 1, this.pw + 1);
-	}
+	this.renderer.clear();
 
 	//Drawing the grid
 	if (this.draw_grid)
@@ -205,15 +194,7 @@ Plan.prototype.refresh = function () {
 		};
 	}
 	
-	this.refreshWalls(this.backwalls, 'rgba(200,0,0,0.5)','rgba(150,0,0,0.5)');
-	this.refreshWalls(this.walls, '#000000','#555555');
-	
-	if (typeof(refreshMetersDecoration) == "function")
-		refreshMetersDecoration(this);
-	
-	this.refreshWindows(this.windows);
-	if (typeof(drawAppliance) != "undefined")
-		this.refreshAppliances(this.appliances_links);
+	this.events.call('refresh');
 
 
 	if (this.cursor != undefined) {
@@ -262,7 +243,7 @@ Plan.prototype.refresh = function () {
 				}
 			}
 		} else if (this.tool == 'wall') {	
-			this.renderer.drawWall(this.toolParams,'#FF0000','#FF0000')
+			this.renderer.drawWall(this.toolParams,'#FF0000','#FF0000');
 		} else if (this.tool == 'appliance') {
 			drawAppliance(this.ctx, this.cursor.x * this.onemeter, this.cursor.y * this.onemeter, this.onemeter * 0.8, this.appliance_type);
 		} else if (this.tool == 'circle') {
@@ -317,6 +298,7 @@ Plan.prototype.displayAlert = function (txt) {
 Plan.prototype.labelize = function (walls) {
 	this.labels = new Array(this.w);
 	var labelnumber = 0;
+	//First pass
 	for (var y = 0;y < this.w; y++) {
 		this.labels[y] = new Array(this.l);
 		for (var x = 0;x < this.l; x++) {
@@ -341,6 +323,7 @@ Plan.prototype.labelize = function (walls) {
 			this.labels[y][x] = newlab;
 		}
 	}
+	//Second pass
 	for (var y = this.w - 2; y >= 0; y--) {
 		for (var x = this.l - 2; x >= 0; x--) {
 			newlab = labelnumber;
@@ -365,35 +348,16 @@ Plan.prototype.labelize = function (walls) {
 };
 
 /**
- * Get the walls and windows of the specified floor
+ * Change the current floor
  * @param floor_id The id of the floor
  * @param backfloor_id The id of the floor under the one passed as floor_id, for background drawing purpose
  */	 
 Plan.prototype.getFloorContent = function(floor_id,backfloor_id) {
-	this.displayMessage('Loading...');	
-	var plan = this;
-	$.ajax({url: '/builder/data/floor_'+ floor_id +'/walls/get',
-		success: function(v){
-			plan.walls = jsonStripModel($.parseJSON(v));
-			plan.hideMessage();
-			plan.refresh();
-			plan.backfloor_id = backfloor_id;
-			plan.events.call('wallLoaded',plan);
-			$.ajax({url: '/builder/data/floor_'+ floor_id +'/appliances/get',
-				success: function(v){
-					plan.appliances_links = jsonStripModel($.parseJSON(v));
-					plan.events.call('applianceLoaded', plan);
-					plan.refresh();
-				}
-			});
-		},
-		error:function(e){alert("Error " + e);},});
-		$.ajax({url: '/builder/data/floor_'+ floor_id +'/windows/get',
-			success: function(v){
-				plan.windows = jsonStripModel($.parseJSON(v));
-				plan.refresh();
-			},});
-		
+	this.displayMessage('Loading...');
+	
+	this.floor_id = floor_id;
+	this.backfloor_id = backfloor_id;
+	this.events.call("floorChanged");
 };
 
 
@@ -424,47 +388,6 @@ Plan.prototype.toolChanged = function() {
 	plan.refresh();
 };
 
-
-/**
- * Redraw the walls in plan
- * @param wall_p List of Wall objects
- * @param color Color of walls
- * @param insulating Color of insulating
- */
-Plan.prototype.refreshWalls = function (wall_p,color,insulating) {
-	if (wall_p == undefined) return;
-	for (var i=0; i<wall_p.length; i++) {
-		var wall = wall_p[i];
-		this.renderer.drawWall(wall,color,insulating);
-	}
-};	
-
-/**
- * Redraw the windows on the plan
- * @param windows_p The list of Window objects
- */
-Plan.prototype.refreshWindows = function(windows_p) {
-	if (windows_p == undefined) return;
-	for (var i=0; i<windows_p.length; i++) {
-		var window = windows_p[i];
-		this.renderer.drawWindow(window);
-	}
-};
-
-/**
- * Redraw the appliances on the plan
- * @param appliances_p The list of Appliance objects
- */
-Plan.prototype.refreshAppliances = function(appliances_p) {
-	if (appliances_p == undefined) return;
-	for (var i=0; i<appliances_p.length; i++) {
-		var appliance = appliances_p[i];
-		if (i == this.selected_appliance)
-			this.renderer.drawAppliance(appliance,this.toolColor);
-		else
-			this.renderer.drawAppliance(appliance);
-	}
-};
 
 /**
  * Find if a point is in the house

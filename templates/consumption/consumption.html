@@ -372,6 +372,10 @@
 								enable_mouse:false,
 								colors:new Array('#5C0DAC',	'#542881',	'#3A0470',	'#8B42D6',	'#9F69D6'),
 								enable_keys:false});
+							registerWallPlugin(p);
+							registerWindowPlugin(p);
+							registerAppliancePlugin(p);
+							registerMeterPlugin(p);
 							p.getFloorContent(floors[i].pk);
 							p.events.register('applianceLoaded',refreshMeters);
 							p.createMeter = createMeter;		

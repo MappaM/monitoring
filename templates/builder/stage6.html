@@ -78,11 +78,19 @@
 			plan.save_appliances(callback,'{{house.pk}}','{{csrf_token}}');
 		}
 		
+		
 		$(document).ready(function(){
+			plan = new Plan({	length:{{house.length}},
+								width:{{house.width}},
+								{{plan_params}}
+							});
+			registerWallPlugin(plan);
+			registerWindowPlugin(plan);
+			registerAppliancePlugin(plan);
 			changeCategory('H',plan);
-			plan.events.register('gridClick', grid_click);
 			plan.events.register('stateChanged', planMouseMove);
-
+			plan.events.register('click',grid_click);
+			
 		});
 	</script>
 	

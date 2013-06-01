@@ -1,3 +1,15 @@
+/* plan_walls.js
+ * Contains all functions relative to walls and drawing them on a plan
+ */
+
+/**
+ * Add a wall to the pla
+ * 
+ * @param start Position of the beginning of the wall
+ * @param end Position of the end of the wall
+ * @param wall_s Size of the wall
+ * @param insulating_s Size of the insulating material
+ */
 Plan.prototype.addWall = function(start,end,wall_s,insulating_s) {
 	if (start.x != end.x && start.y != end.y) {
 		this.displayError('The walls must be vertical or horizontal...');
@@ -10,6 +22,7 @@ Plan.prototype.addWall = function(start,end,wall_s,insulating_s) {
 	}
 	newwall = new Wall(start,end,insulating_s,wall_s);
 	
+	//We search the walls to find if it's not in prolongation of another, and combine them if it's the case.
 	ws = this.getWallsAt(start);	
 	ws = ws.concat(this.getWallsAt(end));	
 	for (var i = 0; i < ws.length; i++) {
@@ -27,8 +40,12 @@ Plan.prototype.addWall = function(start,end,wall_s,insulating_s) {
 	}
 
 	plan.walls.push(newwall);
-}
+};
 
+/**
+ * Remove a wall at a given point on the plan
+ * @param point
+ */
 Plan.prototype.removeWallAt = function(point) {
 	for (var i=0; i<this.walls.length; i++) {
 		var wall = this.walls[i];
@@ -40,7 +57,23 @@ Plan.prototype.removeWallAt = function(point) {
 			break;
 		}
 	}
-}
+};
+
+
+/**
+ * Draw the walls on the plan (via the Renderer)
+ * @param wall_p List of Wall objects
+ * @param color Color of walls
+ * @param insulating Color of insulating
+ */
+Plan.prototype.refreshWalls = function (wall_p,color,insulating) {
+	if (wall_p == undefined) return;
+	for (var i=0; i<wall_p.length; i++) {
+		var wall = wall_p[i];
+		this.renderer.drawWall(wall,color,insulating);
+	}
+};	
+
 
 /**
  * Return true if there's a wall in the list, horizontal, at y from the top and including [xd,xf]
@@ -74,6 +107,11 @@ function hasWallVertical(walls,x, yd , yf) {
 	return false;
 }
 
+/**
+ * Return the list of walls at a given position
+ * @param point A position on the plan
+ * @returns An array of walls at the point
+ */
 Plan.prototype.getWallsAt = function(point) {
 	if (point == undefined) return undefined;
 	var ws = Array();
@@ -88,6 +126,11 @@ Plan.prototype.getWallsAt = function(point) {
 	return ws;
 };
 
+/**
+ * Return a wall at a given position, using the items_next to select one if there's multiple wall at a point
+ * @param point A position on the plan
+ * @returns A wall at the point
+ */
 Plan.prototype.getWallAt = function (point) {
 	var ws = this.getWallsAt(point);
 	if (ws.length > 0) {
@@ -97,7 +140,12 @@ Plan.prototype.getWallAt = function (point) {
 };
 
 
-
+/**
+ * Save the list of walls (via AJAX) and call the callback function if success
+ * @param callback A function to call after success
+ * @param house_id The id of the house
+ * @param csrf_token The csrf token
+ */
 Plan.prototype.save_walls = function (callback,house_id,csrf_token) {
 	if (this.walls == undefined) return;
 	var f = "floor_id=" + floors[selectedFloor].pk +objects_to_request(this.walls,'wall_') + '&csrfmiddlewaretoken=' + csrf_token;
@@ -111,6 +159,12 @@ Plan.prototype.save_walls = function (callback,house_id,csrf_token) {
 		});
 };
 
+/**
+ * Return the wall nearest of a point
+ * @param position A point on the plan
+ * @param offset Ignore the offset first nearest walls
+ * @returns A wall
+ */
 Plan.prototype.getNearestExternalWall = function(position,offset) {
 	if (offset == undefined) offset = 0;
 	this.labelize(this.walls);
@@ -144,6 +198,12 @@ Plan.prototype.getNearestExternalWall = function(position,offset) {
 	return allWalls[offset];
 };
 
+/**
+ * True if wall is an external wall on the plan
+ * @param wall
+ * @param plan
+ * @returns True if wall is external, false if not
+ */
 function wallIsExternal(wall, plan) {
 	if (wall.getOrientation() == 'H'){ //Mur horizontal		
 		
@@ -157,4 +217,35 @@ function wallIsExternal(wall, plan) {
 		}
 	}
 	return false;
+}
+
+/** 
+ * Load the list of wall
+ * @param plan
+ */
+function loadWalls(plan) {
+	$.ajax({url: '/builder/data/floor_'+ plan.floor_id +'/walls/get',
+		success: function(v){
+			plan.walls = jsonStripModel($.parseJSON(v));
+			plan.hideMessage();
+			plan.refresh();
+			plan.events.call('wallLoaded',plan);
+		},
+		error:function(e){alert("Error " + e);},
+	});		
+};
+
+/**
+ * Register this plugin to a plan
+ * @param plan
+ */
+function registerWallPlugin(plan) {
+	//Registering event to load the walls when the user change the floor
+	plan.events.register("floorChanged", loadWalls);
+	
+	//Registering functions for drawing the plan
+	plan.events.register("refresh", function() {
+		plan.refreshWalls(plan.backwalls, 'rgba(200,0,0,0.5)','rgba(150,0,0,0.5)');
+		plan.refreshWalls(plan.walls, '#000000','#555555');	
+	});
 }

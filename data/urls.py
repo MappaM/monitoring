@@ -5,7 +5,7 @@ from django.views.generic import RedirectView
 urlpatterns = patterns(
     '',
 
-    url(r'^([a-zA-Z0-9]+)/([0-9.,]+)$', views.add),
+    url(r'^(?:put/)?([a-zA-Z0-9]+)/([0-9.,]+)$', views.add),
     url(r'^last/([a-zA-Z0-9]+)/([0-9]+)?/?$', views.get_last),
     url(r'^get/([a-zA-Z0-9]+)/?$', views.get),
     url(r'^meter_([a-zA-Z0-9]+)/instant/([0-9]+)?/?$', views.meter_instant),

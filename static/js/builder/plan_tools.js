@@ -27,7 +27,7 @@
 	 * @returns The selected tool
 	 */
 	function getCurrentTool() {
-		tool =  $('#tool:checked').val();
+		tool =  $('#tool[name=tool]:checked').val();
 		if (tool != undefined)
 			return tool;
 		return $('#tool').val();
@@ -96,9 +96,8 @@
 				e = $('<div class="floor_draw floor_' + floors[i].floor.toLowerCase() + '" style="' + st +'cursor:pointer;">&nbsp;</div>');
 				$('#floor_show').append(e);
 			}
-			if (e != undefined) {
-				
-				e.data('floor',i)
+			if (e != undefined) {				
+				e.data('floor',i);
 				if (selectable)
 					e.click(function(e) {changeFloor(e,plan);});
 			}

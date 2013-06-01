@@ -3,11 +3,13 @@
  * This file implements the class EventManager, a stack to register and call events of an object
  */
 
-var EventManager = function() {
+var EventManager = function(defaultContext) {
+	this.context = defaultContext;
 	
 };
 
 EventManager.prototype.call = function(event, context) {
+	if (context == undefined) context = this.context;
 	if (this[event])
 		for (var i = 0; i < this[event].length; i++)
 			this[event][i](context);

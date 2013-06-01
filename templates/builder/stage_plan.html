@@ -15,30 +15,10 @@
 		var selectedFloor = -1;
 		var plan = undefined;
 		var floors = jsonStripModel({{floors|safe}});
-		
-		
-		
-		$(document).ready(function(){	
-			for (var i=0; i<floors.length; i++) {
-				if (floors[i].floor.contains('FLOOR'))
-					selectedFloor = i;
-			}
-			plan = new Plan({% if plan_data %}{{plan_data}}{% else %}{length:{{house.length}},width:{{house.width}},{{plan_params}}}{% endif %});
-			plan.getFloorContent(floors[selectedFloor].pk);
-			drawFloors(plan);
-			var scrolled= false;
-			
-			{% if request.user.profile.autoscroll %}
-			plan.events.register('applianceLoaded', function() {
-				if ($(window).height()< $('.stage_content').height() + $('.stage_content').offset().top && !scrolled) {
-					scrolled = true;
-					$('html, body').stop().animate({
-				        scrollTop: $('.stage_content').offset().top - 10
-				    }, 1000, 'swing');
-				}});
-			{% endif %}
-			
-		});
+		for (var i=0; i<floors.length; i++) {
+			if (floors[i].floor.contains('FLOOR'))
+				selectedFloor = i;
+		}
 		</script>
 	</div>
 	{% block plan_tool %}{% endblock %}
@@ -51,4 +31,25 @@
 	<div id="gonext_error" class="form_error"></div>
 	{% block plan_footer %}{% endblock %}
 	</div>
+	
+	<script type="text/javascript">
+	$(document).ready(function(){
+		//This is put after everything, because ready events are stacked in order and the plan object must exist at this point
+		drawFloors(plan); //Draw the floor selecter
+				
+		plan.getFloorContent(floors[selectedFloor].pk); //Start the loading of the plan
+		
+		var scrolled= false;			
+		{% if request.user.profile.autoscroll %}
+		plan.events.register('applianceLoaded', function() {
+			if ($(window).height()< $('.stage_content').height() + $('.stage_content').offset().top && !scrolled) {
+				scrolled = true;
+				$('html, body').stop().animate({
+			        scrollTop: $('.stage_content').offset().top - 10
+			    }, 1000, 'swing');
+			}});
+		{% endif %}
+		
+	});
+	</script>
 {% endblock %}
