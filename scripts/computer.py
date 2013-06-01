@@ -70,10 +70,23 @@ for drive in all_info.split("\n"):
 
 
 #Motherboard and memory
+memory_slots = subprocess.check_output("dmidecode  -t 17 | grep Size", shell=True).strip()
+nslot = 0
+for slot in memory_slots.split("\n"):
+	nslot += 1
+	mem = re.search("([0-9]+)",slot,re.I)
+	if (mem):
+		memcons = (float(mem.group(0)) / 1024) * 2
+		energy.append(memcons)
+		if verbose:
+			print "Memory of %d detected. Assuming %fWatt" % (int(mem.group(1)), memcons)
+
 if (mobile):
 	energy.append(10)
-else:
+elif nslot <= 2:
 	energy.append(20)
+else:
+	energy.append(30)
 	
 	
 #Screen
@@ -93,7 +106,7 @@ except: #Cannot access xset if no display, assuming on...
 	else:
 		mon = 8
 	if verbose:
-			print "Monitor is probably On. Assuling %dWatt" % mon
+			print "Monitor is probably On. Assuming %dWatt" % mon
 energy.append(mon)
 			
 #Graphic card
@@ -123,15 +136,14 @@ if "nvidia" in card.lower():
 	#Max consumption is exponential with the gamme
 	gpu = gpumin + ((1-(log(11-rangeingamme)/log(11))) * (gpumax-gpumin))
 
-
 	if verbose:
 		print "Your gpu is of gamme %d of its series, its series starts from %d W to %d W, we assume that its max consumption is %d W" % (rangeingamme,gpumin,gpumax,gpu)
 
 	gpuload = 0.1
 	
 	#For now we assume cpu loadexp for gpu
-	gc = gpu * gpuload
-	
+	gc = gpu * (0.2 + gpuload * 0.8)
+	print gc
 	if verbose:
 		print "Your gpu has a load of %f, assuming %f Watts " % (gpuload,gc)
 else:
