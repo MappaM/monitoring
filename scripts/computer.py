@@ -16,7 +16,7 @@ if (len(sys.argv) != 1):
 	print 'Usage : python.py computer.py'
 	sys.exit(-1)
 
-verbose = True
+verbose = False
 energy = []
 
 def get_processor_name():
@@ -141,9 +141,7 @@ if "nvidia" in card.lower():
 
 	gpuload = 0.1
 	
-	#For now we assume cpu loadexp for gpu
 	gc = gpu * (0.2 + gpuload * 0.8)
-	print gc
 	if verbose:
 		print "Your gpu has a load of %f, assuming %f Watts " % (gpuload,gc)
 else:
@@ -216,8 +214,6 @@ while (processor_energy == -1): #Intel sometimes return a 500 error. We just hav
 	except urllib2.HTTPError:
 		processor_energy = -1;	
 
-print numpy.array(energy).sum()		
-		
 #TDP to real consumption conversion
 if (mobile):
 	processor_energy = processor_energy * 0.55
@@ -234,7 +230,6 @@ else:
 
 somme = numpy.array(energy).sum()
 
-print numpy.array(energy).sum()
 
 #Average power conversion efficiency
 if mobile:
