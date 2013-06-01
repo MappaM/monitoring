@@ -78,16 +78,20 @@ else:
 	
 #Screen
 try:
-	screen = subprocess.check_output('xset -q dpms | grep "Monitor is On"', shell=True).strip()
+	screen = subprocess.check_output('xset -q dpms | grep "Monitor is"', shell=True).strip()
+	if "On" in screen:
+		if (mobile):
+			mon = 3
+		else:
+			mon = 8
+		energy.append(mon)
+		if verbose:
+			print "Monitor is On. Assuling %dWatt" % mon
+except: #Cannot access xset if no display, assuming on...
 	if (mobile):
 		mon = 3
 	else:
 		mon = 8
-	energy.append(mon)
-	if verbose:
-		print "Monitor is On. Assuling %dWatt" % mon
-except: #Error if "Monitor is On"
-	pass
 
 #Graphic card
 card = subprocess.check_output("lspci | grep -i vga", shell=True).strip()
