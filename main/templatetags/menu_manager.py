@@ -1,7 +1,4 @@
 from django import template
-from django.conf import settings
-from django.shortcuts import render
-from django.template import loader, Context
 from builder.models import House
 import re
 
