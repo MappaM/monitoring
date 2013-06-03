@@ -41,7 +41,8 @@ Renderer2D.prototype.fillGrid = function(xN,yN,labels,colors) {
 		for (var j = 0; j < yN; j++) {
 			if (labels[j][i] > 0) {
 				this.ctx.fillStyle = colors[(labels[j][i] - 1) % colors.length]; 
-				this.ctx.fillRect((i - this.offsetX) * this.onemeter, (j - this.offsetY) * this.onemeter, this.onemeter, this.onemeter);
+				
+				this.ctx.fillRect(Math.round((i - this.offsetX) * this.onemeter), Math.round((j - this.offsetY) * this.onemeter), this.onemeter, this.onemeter);
 			}
 		}
 	}

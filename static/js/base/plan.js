@@ -147,9 +147,12 @@ function Plan(params) {
 			}
 		}
 		
-		if (this.onemeter > this.onemeter_max) this.onemeter = this.onemeter_max;
-		this.pl = this.onemeter * this.l - 1;		
-		this.pw = this.onemeter * this.w - 1;
+		if (this.onemeter > this.onemeter_max) {
+			this.onemeter = this.onemeter_max;			
+		}
+		this.pl = this.onemeter * this.l ;		
+		this.pw = this.onemeter * this.w ;
+		
 		this.canvas.width(this.pl + 1);
 		this.canvas.height(this.pw + 1);
 		this.ctx.canvas.width = this.pl + 1;
