@@ -66,6 +66,7 @@ function Plan(params) {
 	this.ctx=this.c.getContext("2d");
 	this.windows = Array(); 
 	this.windows_changed = false;
+	this.refreshing = false;
 	
 	//-------------------
 	// Events
@@ -110,6 +111,7 @@ function Plan(params) {
 		document.onkeydown = function(event) {
 			if (event.keyCode == 78) {
 				plan.items_next += 1;
+				plan.events.call('stateChanged');
 				plan.refresh();
 				event.preventDefault();
 			} else if (event.keyCode == 76) {
@@ -118,8 +120,8 @@ function Plan(params) {
 				plan.refresh();
 				event.preventDefault();
 			} else {
-				if (typeof(setToolByKey) == "function")
-					setToolByKey(event);
+				plan.keyboardEvent = event;
+				plan.events.call('keyStroke');
 			}
 		};	
 		
@@ -169,9 +171,31 @@ function Plan(params) {
 }	
 
 /**
+ * Force refresh even if timeout is not out
+ */
+Plan.prototype.forceRefresh = function() {
+	
+}
+
+
+/**
  * Redraw the plan
  */
 Plan.prototype.refresh = function () {
+	
+	//Process to refresh only if not refreshing is currently done
+	if (this.refreshing)  {
+		if (this.refreshAwaiting)
+			console.log("Refreshing ignored.");
+		else {
+			console.log("Refreshing stacked.");
+			this.refreshAwaiting = true;
+		}
+		
+		return;
+	}
+	this.refreshing = true;
+	
 	console.log("Refreshing plan...");
 	
 	//Cleaning canvas
@@ -258,6 +282,16 @@ Plan.prototype.refresh = function () {
 	if (this.start != undefined) {
 		this.renderer.drawCircle(this.start.x * this.onemeter, this.start.y * this.onemeter,'green');
 	}
+	
+	//We use a timeout to draw no more than each 100ms
+	var plan = this;
+	window.setTimeout(function(){
+		plan.refreshing = false;
+		if (plan.refreshAwaiting) {
+			plan.refreshAwaiting = false;
+			plan.refresh();
+		}
+	},66);
 };
 
 

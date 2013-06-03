@@ -6,11 +6,39 @@
 	<div style="max-width:1100px;margin:auto;">
 	<div id="people_show"></div>
 	<script type="text/javascript">
-		function refreshList() {
-			$('#people_show').load('/builder/data/people/show/{{house}}');
+	
+		function getWorkName(name) {
+			for (var i = 0; i < works.length; i++)
+				if (works[i][0] == name)
+					return works[i][1];
 		}
 		
-		function deletePeople(id) {
+		function refreshList() {
+			$('#people_show').empty();
+			var container = $('<div style="text-align:center;height:102px;margin:auto;width:' + (people.length * 104) + 'px;"></div>');
+			for (var i = 0; i < people.length; i++) {
+				var person = people[i];
+				
+				var p = $('<div style="width:100px;float:left;height:100px;border:1px black solid;margin:1px;">'+	
+					person.name + '<br />' +
+					person.age + '<br />' +
+					getWorkName(person.work) + '<br />' + 
+					'<a href="javascript:deletePeople(' +i+ ');" title="Remove people">Remove</a></div>');
+				
+				$('#people_show').append(p);
+			}
+			$('#people_show').append(container);
+			$('#people_show').append($('<div style="clear:both;"></div>'));
+			
+			if (people.length)
+				$('#gonext').show();
+			else
+				$('#gonext').hide();
+		}
+		
+		function deletePeople(i) {
+			var id = people[i].pk;
+			delete(people[i]);
 			$.ajax('/builder/data/people/delete/' + id,{success:refreshList});	
 		}
 		
@@ -19,13 +47,17 @@
 				if (v == "1") {
 					$('#stage_form').resetForm();
 					$('#stage_form_error').html("");
-					refreshList();
+					window.location.reload();
 				} else {
 					$('#stage_form_error').html("You must fill all fields !");
 				}
 			},
 			error:function(){$('#stage_form_error').html("You must fill all fields !")}});
 		}
+		
+		var people = jsonStripModel({{people|safe}});
+		var works = {{works|safe}};
+		
 		$(document).ready(function(){
 			refreshList();
 		});

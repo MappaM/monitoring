@@ -117,7 +117,7 @@ class Floor(models.Model):
         """Returns the most upperleft position of a wall, and the most bottom down"""
         leftCorner = Position(x=sys.maxint,y=sys.maxint)
         maxCorner = Position(x=0,y=0)
-        for w in self.walls.all():
+        for w in self.walls.select_related('start','end').all():
             if w.start.x < leftCorner.x : leftCorner.x = w.start.x
             if w.start.x > maxCorner.x : maxCorner.x = w.start.x
             if w.start.y < leftCorner.y : leftCorner.y = w.start.y
@@ -132,7 +132,7 @@ class Floor(models.Model):
     def has_meters(self):
         """True if there is meters on this floor"""
         for a in self.appliance_links.all():
-            if (a.meter.all() != None):
+            if (a.meter.all().count() > 0):
                 return True;
         return False
     

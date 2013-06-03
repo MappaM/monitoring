@@ -18,7 +18,7 @@ def menu(context):
     else:
         context['page'] = ''
         
-    if houses.count() == 1 and context['page'] != 'builder':
+    if len(houses) == 1 and context['page'] != 'builder':
         request.session['house'] = houses[0].id
         
     context['builder_only'] = (not isinstance(request.session.get('house',False),long)) or request.session['house']==0

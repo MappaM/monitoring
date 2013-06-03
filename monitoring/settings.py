@@ -107,7 +107,7 @@ MIDDLEWARE_CLASSES = (
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.gzip.GZipMiddleware',
-    'pipeline.middleware.MinifyHTMLMiddleware'
+    'pipeline.middleware.MinifyHTMLMiddleware',
 )
 
 LOGIN_URL = '/login/'
@@ -146,6 +146,7 @@ INSTALLED_APPS = (
     'django_extensions',
     'pipeline',
 )
+      
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
@@ -261,6 +262,14 @@ PIPELINE_JS = {
                     'js/jquery.ui.touch-punch.js',
                                   ),
               'output_filename': 'js/jquery.ui.touch-punch.min.js',
+            },
+    'ie': {
+             'source_filenames': (
+                    'js/excanvas.js',
+                    'js/canvas.text.js',
+                    'js/PIE.js'
+                                  ),
+              'output_filename': 'js/ie.min.js',
             },
     'global': {
              'source_filenames': (

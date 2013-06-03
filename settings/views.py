@@ -1,7 +1,6 @@
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.template import RequestContext
-from django.forms.formsets import formset_factory
 from django.forms.models import modelformset_factory
 from forms import ApplianceTypeForm,UserForm,EnergyForm
 from builder.models import ApplianceType,Energy
@@ -13,6 +12,7 @@ from django.contrib.auth.models import User
 
 @login_required
 def main(request):  
+    """Main view of settings, basically user profile and a menu to choose other pages"""
     p, created = Profile.objects.get_or_create(user = request.user)
     if created:
         p.save()
@@ -20,6 +20,7 @@ def main(request):
 
 @permission_required('builder.edit_house')
 def appliances(request):
+    """Page to edit appliances"""
     ApplianceTypeFormSet = modelformset_factory(ApplianceType, form=ApplianceTypeForm, extra=3, can_delete=True)
     if request.method == 'POST':
         formset = ApplianceTypeFormSet(request.POST,queryset=ApplianceType.objects.all().exclude(category='I'))
@@ -36,6 +37,7 @@ def appliances(request):
 
 @permission_required('users.change_user')
 def users(request):
+    """Page to edit users"""
     UserFormSet = modelformset_factory(User, form=UserForm, extra=3, can_delete=True)
     if request.method == 'POST':
         formset = UserFormSet(request.POST)
@@ -49,6 +51,7 @@ def users(request):
 
 @permission_required('builder.edit_house')
 def energies(request):
+    """Page to edit energies"""
     EnergyFormSet = modelformset_factory(Energy, form=EnergyForm, extra=3, can_delete=True)
     
     if request.method == 'POST':

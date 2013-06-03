@@ -126,7 +126,7 @@ var Energy = function(title,short_name,lhv,price) {
  * @returns jquery object
  */
 Energy.prototype.getMeterImage = function(width,height) {
-	var img = $('<img src="/static/img/symbols/'
+	var img = $('<img src="/static/img/symbols/meter_'
 		+ this.short_name + '.png" width="'
 		+ (width) + '" height="' + (height)
 		+ '"/>');
@@ -140,13 +140,6 @@ Energy.prototype.getMeterImage = function(width,height) {
 	return img;
 };
 
-
-var Wall = function (start,end,insulating_size,wall_size) {
-	this.start = start;
-	this.end = end;
-	this.insulating_size = insulating_size;
-	this.wall_size = wall_size;
-};
 
 /**
  * Return an image jquery object which represent the energy
@@ -165,6 +158,25 @@ Energy.prototype.getImage = function(width,height) {
 };
 
 
+/**
+ * Create a new wall
+ */
+var Wall = function (start,end,insulating_size,wall_size) {
+	if (start.x > end.x || start.y > end.y) {
+		tmp = start;
+		start = end;
+		end = tmp;
+	}
+	this.start = start;
+	this.end = end;
+	this.insulating_size = insulating_size;
+	this.wall_size = wall_size;
+};
+
+/**
+ * Return the orientation of a wall
+ * @returns {String} H if horizontal, V if vertical
+ */
 Wall.prototype.getOrientation = function () {
 	if (this.start.x == this.end.x)
 		return 'V';

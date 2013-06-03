@@ -76,7 +76,11 @@
 			activeClass : 'meter_active',
 			});
 			
-			plan = new Plan({{plan_data}});
+			plan = new Plan({	enable_mouse:false,
+								draw_grid:false,
+								onemeter_max:76,
+								onemeter_min:35,
+								precision:0,{{plan_data}}});
 			registerWallPlugin(plan);
 			registerWindowPlugin(plan);
 			registerAppliancePlugin(plan);

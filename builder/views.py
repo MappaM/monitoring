@@ -55,7 +55,12 @@ def house_delete(request,house_id):
 def stage2(request):  
     house = shortcuts.get_object_or_404(House, id=request.session['house'])  
     person = forms.PersonForm(initial = {'house': house.pk});
-    context = {'form': person,'house':house.pk} 
+    people = Person.objects.filter(house_id=house)
+    context = {'form': person,
+               'house':house.pk,
+               'people' : serializers.serialize("json", people,use_natural_keys=True),
+               'works':json.dumps(Person.WORK)
+               } 
     return render(request, 'builder/stage2.html', context)
 
 
@@ -72,12 +77,6 @@ def people_add(request):
 def people_delete(request, person):
     Person.objects.get(pk=person).delete()   
     return HttpResponse(1)
-
-@permission_required('builder.edit_house')    
-def people_show(request, house):
-    people = Person.objects.filter(house_id=house)
-    context = {'people' : people}
-    return render(request, 'builder/data/people/show.html', context)
 
 #Stage 3 : floors
 @permission_required('builder.edit_house')
@@ -159,7 +158,7 @@ def walls_save(request, house_id):
 @never_cache
 @permission_required('builder.edit_house')
 def walls_get(request, floor_id):
-    return HttpResponse(serializers.serialize("json", Wall.objects.filter(floor = floor_id),use_natural_keys=True))
+    return HttpResponse(serializers.serialize("json", Wall.objects.select_related('start','end','floor').filter(floor = floor_id),use_natural_keys=True))
 
 #Stage 5 : Windows
 @permission_required('builder.edit_house')
@@ -196,7 +195,7 @@ def windows_save(request, house_id):
 @never_cache
 @permission_required('builder.edit_house')
 def windows_get(request, floor_id):
-    return HttpResponse(serializers.serialize("json", Window.objects.filter(floor = floor_id),use_natural_keys=True))
+    return HttpResponse(serializers.serialize("json", Window.objects.select_related('center','floor').filter(floor = floor_id),use_natural_keys=True))
 
 #Stage 6 : Appliances
 @permission_required('builder.edit_house')
@@ -243,7 +242,7 @@ def appliances_save(request, house_id):
 @never_cache
 @permission_required('builder.edit_house')
 def appliances_links_get(request, floor_id):
-    return HttpResponse(serializers.serialize("json", ApplianceLink.objects.filter(floor = floor_id),use_natural_keys=True, relations={'appliance':{'relations':('energies',)}}))
+    return HttpResponse(serializers.serialize("json", ApplianceLink.objects.select_related('appliance','floor').filter(floor = floor_id),use_natural_keys=True, relations={'appliance':{'relations':('energies',)}}))
 
 @never_cache
 @permission_required('builder.edit_house')
@@ -278,7 +277,7 @@ def stage7(request):
                 'meter_modes':json.JSONEncoder().encode(Meter.MODES),
                 'energies_used':serializers.serialize("json",list(house.getEnergies())),
                 'energies':serializers.serialize("json",Energy.objects.all()),                
-                'plan_data':'{onemeter_min:35,    precision:0, length:' + str(maxCorner.x - minCorner.x + 4) + ', width:' + str(maxCorner.y - minCorner.y + 6) + ',offsetX:' + str(minCorner.x - 2) + ', offsetY:' + str(minCorner.y - 4) + ', draw_grid:false,onemeter_max:76}',
+                'plan_data':'length:' + str(maxCorner.x - minCorner.x + 4) + ', width:' + str(maxCorner.y - minCorner.y + 6) + ',offsetX:' + str(minCorner.x - 2) + ', offsetY:' + str(minCorner.y - 4),
                 'form':meterForm,
                 'title':'Meter',
                 'appliance_types_categories':ApplianceType.APPLIANCE_CATEGORY,

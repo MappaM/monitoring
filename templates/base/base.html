@@ -6,26 +6,23 @@
    	{% compressed_css 'base'%}
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <!--[if lt IE 9]>
-    <script type="text/javascript" src="/static/js/excanvas.js"></script>
-    <script type="text/javascript" src="/static/js/canvas.text.js"></script>
-    <script type="text/javascript" src="/static/js/PIE.js"></script>
-    <script type="text/javascript">
-    	$(document).ready(function() {
-		    if (window.PIE) {
-		        $('li').each(function() {
-		            PIE.attach(this);
-		        });
-		      
-		        $('div').each(function() {
-		            PIE.attach(this);
-		        });
-
-		    }
-		});
-    </script>
+	    {% compressed_js 'ie'%}
+	    <script type="text/javascript">
+	    	$(document).ready(function() {
+			    if (window.PIE) {
+			        $('li').each(function() {
+			            PIE.attach(this);
+			        });
+			      
+			        $('div').each(function() {
+			            PIE.attach(this);
+			        });
+	
+			    }
+			});
+	    </script>
+	    <link rel="stylesheet" type="text/css" media="all" href="/static/css/ie.css" />
     <![endif]-->
-    <!--[if lt IE 9]><link rel="stylesheet" type="text/css" media="all" href="/static/css/ie.css" /><![endif]-->
-    
    	{% compressed_js 'global'%}
    	{% compressed_js 'touch-punch'%}
 </head>

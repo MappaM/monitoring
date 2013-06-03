@@ -8,14 +8,15 @@ from django.contrib.auth.decorators import permission_required
 @permission_required('builder.view_house')
 def main(request):  
     house = House.objects.get(pk=request.session['house'])
-    floors = Floor.objects.filter(house=house)
-   
+    floors = Floor.objects.select_related('house').filter(house=house)   
     minCorner,maxCorner = house.getDimension();  
     context = {
             'house':house,
             'floor_types':Floor.FLOOR,
             'floors':floors,
-            'meters':serializers.serialize("json", Meter.objects.filter(house = house),use_natural_keys=True,relations={'energy':(),'appliance_link':{'relations':{'center':(),'appliance':{'relations':('energies',)}}}}),
+            'meters':serializers.serialize( "json", 
+                                            Meter.objects.select_related('house','energy','appliance_link','appliance_link__center','appliance_link__appliance').filter(house = house),
+                                            use_natural_keys=True,relations={'energy':(),'appliance_link':{'relations':{'center':(),'appliance':{'relations':('energies',)}}}}),
             'width':(maxCorner.y - minCorner.y),
             'length':(maxCorner.x - minCorner.x),
             'energies':serializers.serialize("json",Energy.objects.all()),

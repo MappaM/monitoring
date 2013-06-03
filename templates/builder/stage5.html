@@ -27,12 +27,15 @@
 			plan.refresh();			
 		}
 		
-		function setToolByKey(e) {
+		function setToolByKey(plan) {
+			var e = plan.keyboardEvent;
 			if (e.keyCode == 69  || e.keyCode == 82) //e or r
 				$('#tool[value=windowRemover]').prop('checked',true);
 			else if (e.keyCode == 87) //w 
 				$('#tool[value=window]').prop('checked',true);
 			else return;
+
+			plan.refresh();
 			e.preventDefault();
 		}
 		
@@ -52,6 +55,7 @@
 			registerWallPlugin(plan);
 			registerWindowPlugin(plan);
 			plan.events.register('click',grid_click);
+			plan.events.register('keyStroke',setToolByKey);
 		});
 	</script>
 	<div style="float:left;background-color:#dcad61;width:200px;text-align:left;">

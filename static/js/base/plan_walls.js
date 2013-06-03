@@ -15,11 +15,7 @@ Plan.prototype.addWall = function(start,end,wall_s,insulating_s) {
 		this.displayError('The walls must be vertical or horizontal...');
 		return;
 	}
-	if (start.x > end.x || start.y > end.y) {
-		tmp = start;
-		start = end;
-		end = tmp;
-	}
+
 	newwall = new Wall(start,end,insulating_s,wall_s);
 	
 	//We search the walls to find if it's not in prolongation of another, and combine them if it's the case.

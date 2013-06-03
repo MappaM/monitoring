@@ -12,7 +12,6 @@ urlpatterns = patterns(
     
     url(r'^stage2/?$', views.stage2),    
     url(r'^data/people/add/?$', views.people_add),
-    url(r'^data/people/show/(\d+)/?$', views.people_show),
     url(r'^data/people/delete/(\d+)/?$', views.people_delete),
     
     url(r'^stage3/?$', views.stage3),

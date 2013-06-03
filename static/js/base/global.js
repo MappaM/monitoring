@@ -12,6 +12,10 @@ Array.prototype.removeEquals = function(obj) {
 	this.remove(this.indexOf(obj)); 
 };
 
+String.prototype.startsWith = function (str){
+    return this.indexOf(str) == 0;
+  };
+
 
 /**
  * Change the selected house and redirect to that page
@@ -182,4 +186,23 @@ function modal(content) {
 	overlay.append(content);
 	content.css('margin', 'auto');
 	content.css('marginTop', ($(window).height() - content.height()) / 2);
+}
+
+
+function unitFormat(value,unit) {
+	if (unit.startsWith('k')) {
+		unit = unit.substr(1);
+		value *= 1000;
+	}
+	var v;
+	if (value> 1000000) {
+		v = (value /1000000.0).toFixed(0);
+		unit  = + 'M' +unit;
+	} else if (value> 1000) {
+		v = (value /1000.0) .toFixed(0);
+		unit = 'k' +unit;
+	} else
+		v = value.toFixed(0);
+	
+	return v + ' ' + unit;
 }

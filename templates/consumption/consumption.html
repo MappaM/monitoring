@@ -201,7 +201,7 @@
 						} else {	
 	
 							var data = parseFloat(data);
-							m.find('div:first').append((((Math.round(data) ==data)?Math.round(data):data.toFixed(2))) + ' ' + meter.energy.unit_instant);
+							m.find('div:first').append(unitFormat(data,meter.energy.unit_instant));
 							
 							var unit = meter.energy.unit_instant.replace('Watt','W');
 							$.getJSON('/data/meter_'+meter.hash+'/instant/86400', function(raw_data) {
@@ -221,6 +221,7 @@
 										}
 										data.push([time / cons, sum/cons]);
 									}
+									data.push(raw_data[raw_data.length - 1]);
 								} else {
 									data = raw_data;
 								}
@@ -240,6 +241,7 @@
 							        tooltip: {
 						                shared: true,
 						                borderColor:meter.energy.color,
+		
 						            },
 						            legend:{
 						            	enabled:false
@@ -251,12 +253,7 @@
 						            	title:'',
 						            
 						            	labels:{formatter: function(){
-						            		if (this.value> 1000000)
-						            			return this.value.toFixed(0)/1000000 + ' M' +unit
-						            		else if (this.value> 1000)
-						            			return this.value.toFixed(0)/1000 + ' k' +unit
-						            		else
-						            			return this.value.toFixed(0) + ' ' +unit
+						            			return unitFormat(this.value,unit);						            			
 						            		},
 						            	useHTML:true},
 						            },
@@ -287,6 +284,9 @@
 												valueDecimals: 2,
 							                    valueSuffix: ' '+unit.replace('&deg;','°'),
 							                    useHTML:true,
+							                    formatter: function(){
+							            			return unitFormat(this.value,unit);						            			
+							            		}
 							                }
 										}
 										]
@@ -322,8 +322,11 @@
 				floors = new Array();
 				nofloors = new Array();
 				{% for f in floors %}
-					{% if f.has_meters %}floors.push({pk:{{f.pk}},house:'{{f.house.pk}}',floor:'{{f.floor}}'});
-					{% else %}nofloors.push({pk:{{f.pk}},house:'{{f.house.pk}}',floor:'{{f.floor}}'});
+					{% if f.has_meters %}
+						floors.push({pk:{{f.pk}},house:'{{f.house.pk}}',floor:'{{f.floor}}'});
+						
+					{% else %}
+						nofloors.push({pk:{{f.pk}},house:'{{f.house.pk}}',floor:'{{f.floor}}'});
 					{% endif %}
 				{% endfor %}
 				
@@ -348,9 +351,6 @@
 					
 						var swidth='';
 		
-							
-						console.log(floors);
-						console.log(floors.length);
 						for (var i=0; i<floors.length; i++) {
 							
 							var cvs = $('<canvas id="plan' + floors[i].pk +'" style="width:100%;margin:auto;" class="plan' + floors[i].pk +'" ></canvas>');

@@ -12,7 +12,7 @@ from django.shortcuts import get_object_or_404
 @permission_required('alert.change_alert')
 def main(request):
     house = House.objects.get(pk=request.session['house'])
-    floors = Floor.objects.filter(house=house)
+    floors = Floor.objects.select_related('house').filter(house=house)
     
     minCorner,maxCorner = house.getDimension();  
     context = {
@@ -21,7 +21,7 @@ def main(request):
             'adc_types':json.dumps(ADC.TYPES),
             'alert_types':json.dumps(Alert.TYPES),
             'logic_types':json.dumps(Logic.TYPES),
-            'meters':serializers.serialize("json", Meter.objects.filter(house = house).order_by('appliance_link'),use_natural_keys=True,relations={'energy':(),'appliance_link':{'relations':{'floor':(),'center':(),'appliance':{'relations':('energies',)}}}}),
+            'meters':serializers.serialize("json", Meter.objects.select_related('house','energy','appliance_link','appliance_link__center','appliance_link__appliance').filter(house = house).order_by('appliance_link'),use_natural_keys=True,relations={'energy':(),'appliance_link':{'relations':{'floor':(),'center':(),'appliance':{'relations':('energies',)}}}}),
             'width':(maxCorner.y - minCorner.y),
             'length':(maxCorner.x - minCorner.x),
             'energies':serializers.serialize("json",Energy.objects.all()),

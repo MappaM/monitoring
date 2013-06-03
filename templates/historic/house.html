@@ -11,14 +11,14 @@
 <script type="text/javascript" src="/static/js/highstock.js"></script>
 	
 		<div id="meters">
-			<div id="overall"></div>
+			<div id="overall" style="overflow:hidden;"></div>
 			<div style="clear:both;padding:10px;">
 				<a class="form_btn historic_btn_consumption" href="javascript:year('consumption');" title="Consumption">&nbsp;</a>
 				<a class="form_btn historic_btn_lhv" href="javascript:year('lhv');" title="LHV">&nbsp;</a>
 				<a class="form_btn historic_btn_price" href="javascript:year('price');" title="Price">&nbsp;</a></div>
-			<div style="overflow:hidden" id ="years">
-				<div id="year" style="width:65%;float:left;min-height:300px;"></div>
-				<div id="year_tot" style="width:35%;float:left;min-height:300px;"></div>
+			<div style="overflow:hidden;width:100%;box-sizing:border-box;" id ="years">
+				<div id="year" style="width:65%;min-height:300px;float:left;box-sizing:border-box;"></div>
+				<div id="year_tot" style="width:35%;min-height:300px;float:right;box-sizing:border-box;"></div>
 			</div>
 			
 		</div>
@@ -240,7 +240,9 @@
 		
 			$.getJSON({% if meter_mode %}'/data/meter_{{meters.0.hash}}/all/'{% else %}'/data/house_{{request.session.house}}/all/'{% endif %}, function(data) {
 				var overall=$('#overall');
-			    overall.highcharts('StockChart',{
+				var t = $('<div></div>');
+				overall.append(t);
+			    t.highcharts('StockChart',{
 			      	chart: {
 			      		type:'spline',
 			      		backgroundColor:'rgba(255,255,255,0.7)'
@@ -352,7 +354,7 @@
 					xAxis:[ {ordinal: false
 		            }]
 			    });
-			    chart = overall.highcharts();
+			    chart = t.highcharts();
 			    for (var i = 0; i < chart.yAxis.length; i++) {
 					if (chart.yAxis[i].getExtremes().min < 0 && chart.yAxis[i].getExtremes().dataMin >= 0) {
 						chart.yAxis[i].setExtremes(0,null);

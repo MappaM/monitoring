@@ -98,8 +98,9 @@
 			        yAxis:[
 							{
 			            	   labels: {
+			            		   
 			                       formatter: function() {
-			                           return this.value +' {{meter.energy.unit_instant|safe}}';
+			                           return unitFormat(this.value,'{{meter.energy.unit_instant|safe}}');
 			                       },
 			                       useHTML:true,
 			                       style: {

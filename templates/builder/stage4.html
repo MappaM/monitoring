@@ -25,14 +25,16 @@
 			}
 		}
 		
-		function setToolByKey(e) {
+		function setToolByKey(plan) {
+			var e = plan.keyboardEvent;
 			if (e.keyCode == 69)
 				$('#tool[value=eraser]').prop('checked',true);
 			else if (e.keyCode == 87)
 				$('#tool[value=wall]').prop('checked',true);
 			else return;
 			e.preventDefault();
-			plan.refresh();
+			stateChanged(plan);
+			wee
 		}
 		
 		function grid_click(plan) {			
@@ -77,7 +79,7 @@
 				var ws = plan.getWallsAt(plan.cursor);
 				if (ws == undefined) return;
 				if (ws.length > 1) {
-					plan.displayAlert('Press N to put the window on another wall');
+					plan.displayAlert('Press N to select another wall to delete');
 				}				
 				var wall = ws[plan.items_next % ws.length];
 				if (wall != undefined) {
@@ -128,6 +130,7 @@
 			plan.events.register('stateChanged',stateChanged);
 			plan.events.register('wallLoaded',copyWalls);
 			plan.events.register('click',grid_click);
+			plan.events.register('keyStroke',setToolByKey);
 			
 		});
 		

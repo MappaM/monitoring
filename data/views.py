@@ -38,12 +38,12 @@ def get(request,hash):
     
 
 def meter_instant(request,hash,delta):  
-    meter = Meter.objects.get(hash=hash)    
+    meter = Meter.objects.select_related('energy').get(hash=hash)    
     data = Reading.get_instant(meter,delta)        
     return HttpResponse(json.dumps(data), content_type="application/json")
 
 def meter_consumption(request,hash,delta):  
-    meter = Meter.objects.get(hash=hash)    
+    meter = Meter.objects.select_related('energy').get(hash=hash)    
     list = ReadingDay.objects.filter(meter=meter).order_by('date')
     data = []
     for item in list:
