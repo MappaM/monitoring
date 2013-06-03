@@ -7,6 +7,7 @@
 		
 		plan.displayMessage('Saving...');
 		var newFloor = $(e.target).data('floor');
+		if (newFloor == undefined) newFloor = 0;
 		labels = undefined;
 		save(function() {
 		selectedFloor = newFloor;
@@ -27,7 +28,7 @@
 	 * @returns The selected tool
 	 */
 	function getCurrentTool() {
-		tool =  $('#tool[name=tool]:checked').val();
+		var tool =  $('#tool[name="tool"]:checked').first().val();
 		if (tool != undefined)
 			return tool;
 		return $('#tool').val();
@@ -62,7 +63,7 @@
 					var c=document.getElementById("floor_roof");
 					
 					if (!c.getContext)
-						G_vmlCanvasManager.initElement(e);
+						G_vmlCanvasManager.initElement(c);
 					var ctx=c.getContext("2d");
 					var th = fh - s;
 					ctx.moveTo(1,th + 2);

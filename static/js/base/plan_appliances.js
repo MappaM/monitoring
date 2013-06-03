@@ -70,7 +70,8 @@ function displayApplianceTypes(appliances_types,plan) {
 		li.append(canvas);
 		$(canvas).ready(function(){
 			var w = 68;
-		
+			if (!canvas[0].getContext)
+				G_vmlCanvasManager.initElement(canvas[0]);
 			var ctx = canvas[0].getContext("2d");
 			ctx.canvas.width = w;
 			ctx.canvas.height = w;
