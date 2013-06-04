@@ -321,6 +321,7 @@ h1 {
 	height:96px;
 	margin:8px;
 	padding:2px;
+	background-color:rgb(200,200,200); /*Old browser*/
 	background-color:rgba(255,255,255,0.2);
 	text-align:center;
 	border-radius:51px;
@@ -328,11 +329,12 @@ h1 {
 }
 
 .meter_active {
-	
+	background-color:rgb(200,240,160) !important; /*Old browser*/
 	background-color:rgba(200,240,160,0.45) !important;
 }
 
 .meter_hover {
+	background-color:rgb(150,200,60) !important; /*Old browser*/
 	background-color:rgba(150,200,60,0.7) !important;
 }
 

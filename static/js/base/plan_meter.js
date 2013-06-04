@@ -20,10 +20,12 @@ function initialiseDraggableMeter(energies_used) {
 				meter.css('backgroundColor',meter.data('energy').color);
 				
 				var currentColor = meter.css('backgroundColor');
+				var newColor;
                 var rgb = currentColor.match(/[ ]*([0-9]+)[ ]*,[ ]*([0-9]+)[ ]*,[ ]*([0-9]+)[ ]*/);
-                console.log(rgb);
-                var newColor = "rgba("+rgb[1]+","+rgb[2]+","+rgb[3]+",0.5)"
-                console.log(newColor);
+                if (rgb)
+                	newColor = "rgba("+rgb[1]+","+rgb[2]+","+rgb[3]+",0.5)"
+                else
+                	newColor = currentColor;
                 meter.css('backgroundColor',newColor);
 				plan.selectedMeter = meter;
 			}

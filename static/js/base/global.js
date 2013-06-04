@@ -2,6 +2,19 @@
  * This file contains all function that must be accessible in all applications
  */
 
+
+/* Array indexOk for IE<9*/
+if (!Array.indexOf) {
+  Array.prototype.indexOf = function (obj, start) {
+    for (var i = (start || 0); i < this.length; i++) {
+      if (this[i] == obj) {
+        return i;
+      }
+    }
+    return -1;
+  }
+}
+
 Array.prototype.remove = function(from, to) {
   var rest = this.slice((to || from) + 1 || this.length);
   this.length = from < 0 ? this.length + from : from;

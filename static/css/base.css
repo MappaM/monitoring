@@ -139,13 +139,13 @@ form ul{
 	cursor:auto;
 }
 #menubar #menu_historic.active {
-	background-color:rgba(210,248,155,1);
+	background-color:rgb(210,248,155);
 }
 #menubar #menu_settings {
 	background-image:url('/static/img/base/menu/settings.png');
 }
 #menubar #menu_settings.active {
-	background-color:rgba(190,190,190,1);
+	background-color:rgb(190,190,190);
 }
 #menubar #menu_upgrade {
 	background-image:url('/static/img/base/menu/upgrade.png');
@@ -155,13 +155,13 @@ form ul{
 	cursor:auto;
 }
 #menubar #menu_upgrade.active {
-	background-color:rgba(210,248,155,1);
+	background-color:rgb(210,248,155);
 }
 #menubar #menu_builder {
 	background-image:url('/static/img/base/menu/builder.png');
 }
 #menubar #menu_builder.active {
-	background-color:rgba(255,210,220,1);
+	background-color:rgb(255,210,220);
 }
 #menubar #menu_alert {
 	background-image:url('/static/img/base/menu/alert.png');
@@ -171,7 +171,7 @@ form ul{
 	background-image:url('/static/img/base/menu/alert_off.png');
 }
 #menubar #menu_alert.active {
-	background-color:rgba(190,220,252,1);
+	background-color:rgb(190,220,252);
 }
 #menubar #menu_consumption {
 	background-image:url('/static/img/base/menu/consumption.png');
@@ -181,13 +181,14 @@ form ul{
 	background-image:url('/static/img/base/menu/consumption_off.png');
 }
 #menubar #menu_consumption.active {
-	background-color:rgba(200,180,250,1);
+	background-color:rgb(200,180,250);
 }
 #menubar li.off {
 	opacity:0.5;
 }
 
 .overlay {
+	background-color:rgb(100,100,100); /*Old brower*/
 	background-color:rgba(0,0,0,0.5);
 	position:fixed;
 	width:100%;
