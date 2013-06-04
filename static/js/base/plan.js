@@ -164,12 +164,15 @@ function Plan(params) {
 		this.refresh();
 		if (this.afterResize != undefined) this.afterResize(this);
 	};
-	$(window).smartresize(function(){plan.resize();});
-	$(window).scroll(function() {
-	    clearTimeout($.data(this, "scrollTimer"));
-	    $.data(this, "scrollTimer", setTimeout(function() {
-	    	plan.resize();
-	    }, 50));});
+	
+	if (!/MSIE [23456678]/.test(navigator.appVersion)) {
+		$(window).smartresize(function(){plan.resize();});
+		$(window).scroll(function() {
+		    clearTimeout($.data(this, "scrollTimer"));
+		    $.data(this, "scrollTimer", setTimeout(function() {
+		    	plan.resize();
+		    }, 50));});
+	}
 	this.resize();
 }	
 

@@ -539,37 +539,39 @@ function drawCallers(plan) {
 	}
 	$('#overall_meters').width((w + 4) * n);
 	
-	//Drawing callers for appliances meters
-	plan.canvas.parent().find('.meter').remove();
-	for ( var i = 0; i < plan.appliances_links.length; i++) {
-		var a = plan.appliances_links[i];
-		
-		var mets = findMeterByPk(a.pk);
-		if (mets.length == 0) continue;
-
-		var p = plan.renderer.getPosition(a.center);
-		var w = plan.renderer.getApplianceWidth();
-		
-		var ma = $('<div class="meter"></div>');
-		ma.width(w);
-		ma.height(w);
-		ma.css('left',p.x - w / 2);
-		ma.css('top',p.y - w / 2);
-		plan.canvas.parent().append(ma);
-		(function(ms,zone){
-			ma.click(function() {
-				if (ms.length > 1) {
-					multipleMeterSelector(ms,function(meter){
-						changeBoard(meter,zone);
-					});
-				} else {
-					changeBoard(ms[0],zone);
-				}
-		
-		});})(mets,ma);
-	}
+	if (plan.appliances_links != undefined)
+		console.log(plan.appliances_links);
+		//Drawing callers for appliances meters
+		plan.canvas.parent().find('.meter').remove();
+		for ( var i = 0; i < plan.appliances_links.length; i++) {
+			var a = plan.appliances_links[i];
+			
+			var mets = findMeterByPk(a.pk);
+			if (mets.length == 0) continue;
 	
-	bg_resize();
+			var p = plan.renderer.getPosition(a.center);
+			var w = plan.renderer.getApplianceWidth();
+			
+			var ma = $('<div class="meter"></div>');
+			ma.width(w);
+			ma.height(w);
+			ma.css('left',p.x - w / 2);
+			ma.css('top',p.y - w / 2);
+			plan.canvas.parent().append(ma);
+			(function(ms,zone){
+				ma.click(function() {
+					if (ms.length > 1) {
+						multipleMeterSelector(ms,function(meter){
+							changeBoard(meter,zone);
+						});
+					} else {
+						changeBoard(ms[0],zone);
+					}
+			
+			});})(mets,ma);
+		}
+	if (!/MSIE [23456678]/.test(navigator.appVersion))	
+		bg_resize();
 }
 
 /**

@@ -9,10 +9,13 @@
 <h1>Statistics</h1>
 <script type="text/javascript" src="/static/js/highstock.js"></script>
 		<div id="meter"></div>
-		<div style="clear:both;padding:10px;">
-				<a class="form_btn historic_btn_consumption" href="javascript:changeUnit('consumption');" title="Consumption">&nbsp;</a>
-				<a class="form_btn historic_btn_price" href="javascript:changeUnit('price');" title="Price">&nbsp;</a></div>
+		{% if meter.energy.price > 0 %}
+			<div style="clear:both;padding:10px;">
+			<a class="form_btn historic_btn_consumption" href="javascript:changeUnit('consumption');" title="Consumption">&nbsp;</a>
+			<a class="form_btn historic_btn_price" href="javascript:changeUnit('price');" title="Price">&nbsp;</a></div>
+		{% endif %}
 		<div id="meter_cons" style="min-height:400px;"></div>
+		
 		<script type="text/javascript">
 			Highcharts.setOptions({global:{useUTC:false}});
 			$.getJSON('/data/meter_{{meter.hash}}/instant/', function(data) {
