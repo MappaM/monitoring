@@ -6,7 +6,7 @@ import httplib
 
 def main():
     if (len(sys.argv) != 3):
-        print 'Usage : python.py getval.py HOST HASH'
+        print 'Usage : python getval.py HOST HASH'
         sys.exit(-1)
 
     conn = httplib.HTTPConnection(sys.argv[1])
@@ -17,3 +17,6 @@ def main():
         print 0
     else:
         print data1
+        
+if __name__ == "__main__":
+    main()
