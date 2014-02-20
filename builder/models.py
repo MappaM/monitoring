@@ -255,7 +255,7 @@ class Meter(models.Model):
     hash = models.CharField(max_length=12)
     house =  models.ForeignKey(House)
     appliance_link = models.ForeignKey(ApplianceLink,blank=True,null=True,related_name='meter');
-   
+    options = models.TextField();
     
     def get_instant(self, delta):
         """Return the last instant consumption measured on this meter, return NODATA if no reading received

@@ -10,13 +10,14 @@ import multiprocessing
 import numpy
 from math import log,exp
 import psutil
-
+import platform
 
 if (len(sys.argv) != 1):
 	print 'Usage : python.py computer.py'
 	sys.exit(-1)
 
 verbose = False
+win = (platform.system() == "Windows")
 energy = []
 
 def get_processor_name():
@@ -42,7 +43,19 @@ if verbose:
 
 #Hard drives
 all_info = subprocess.check_output("ls /dev/sd[a-z]", shell=True).strip()
-for drive in all_info.split("\n"):
+if (platform.system()=="Windows"):
+    for drive in all_info.split("\n"):
+	 if mobile:
+		if verbose:
+                	print "HDD Detected. Assuming 2Watt"
+                        p = 2
+                else:
+                        if verbose:
+                             print "HDD Detected. Assuming 6Watt"
+                             p = 6
+                        energy.append(p * (load/2 + 0.5))
+else:
+    for drive in all_info.split("\n"):
 	try:
 		dev_info = subprocess.check_output("hdparm -I " + drive, shell=True).strip()
 		ssd = False
@@ -70,16 +83,20 @@ for drive in all_info.split("\n"):
 
 
 #Motherboard and memory
-memory_slots = subprocess.check_output("dmidecode  -t 17 | grep Size", shell=True).strip()
 nslot = 0
-for slot in memory_slots.split("\n"):
-	nslot += 1
-	mem = re.search("([0-9]+)",slot,re.I)
-	if (mem):
-		memcons = (float(mem.group(0)) / 1024) * (1 if (mobile) else 2)
-		energy.append(memcons)
-		if verbose:
-			print "Memory of %d detected. Assuming %fWatt" % (int(mem.group(1)), memcons)
+if (win):
+	nsolt = 3	
+else:
+	memory_slots = subprocess.check_output("dmidecode  -t 17 | grep Size", shell=True).strip()
+	nslot = 0
+	for slot in memory_slots.split("\n"):
+		nslot += 1
+		mem = re.search("([0-9]+)",slot,re.I)
+		if (mem):
+			memcons = (float(mem.group(0)) / 1024) * (1 if (mobile) else 2)
+			energy.append(memcons)
+			if verbose:
+				print "Memory of %d detected. Assuming %fWatt" % (int(mem.group(1)), memcons)
 
 if (mobile):
 	energy.append(8)
@@ -91,74 +108,81 @@ else:
 	
 #Screen
 mon = 0
-try:
-	screen = subprocess.check_output('xset -q dpms | grep "Monitor is"', shell=True).strip()
-	if "On" in screen:
+if (win):
+	mon = 8
+else:
+	try:
+		screen = subprocess.check_output('xset -q dpms | grep "Monitor is"', shell=True).strip()
+		if "On" in screen:
+			if (mobile):
+				mon = 3
+			else:
+				mon = 8		
+			if verbose:
+				print "Monitor is On. Assuling %dWatt" % mon
+	except: #Cannot access xset if no display, assuming on...
 		if (mobile):
 			mon = 3
 		else:
-			mon = 8		
+			mon = 8
 		if verbose:
-			print "Monitor is On. Assuling %dWatt" % mon
-except: #Cannot access xset if no display, assuming on...
-	if (mobile):
-		mon = 3
-	else:
-		mon = 8
-	if verbose:
-			print "Monitor is probably On. Assuming %dWatt" % mon
+				print "Monitor is probably On. Assuming %dWatt" % mon
 energy.append(mon)
 			
 #Graphic card
-card = subprocess.check_output("lspci | grep -i vga", shell=True).strip()
-
-if "nvidia" in card.lower():
-	card = re.search( ".*:([a-z0-9 \[\]]+)", card, re.I ).group(1)
-
-	newcard = re.search("([0-9]{3,4})(M)?",card,re.I)
-	mobilegpu = newcard.group(2)
-
-	#Searching the max consumption according to the gamme
-	if mobilegpu:
-		gpumin = 5 #Max consumptin of a low-gam mobile GPU
-		gpumax = 60 #Max consumption of better mobile GPU
-	else:
-		gpumin = 15 #Idem for desktops GPUs. Remember it is the max consumption of the GPU
-		gpumax = 200
-
-	model = int(newcard.group(1))
-	#The old series of gpu have 4 number
-	if (model>1000):
-		gpumax = gpumax * 0.7 #Old GPU use less power
-		model = model/10
-	rangeingamme = (model % 100) / 10.0 #Number from 0 to 10 representing the level in gam
-	
-	#Max consumption is exponential with the gamme
-	gpu = gpumin + ((1-(log(11-rangeingamme)/log(11))) * (gpumax-gpumin))
-
-	if verbose:
-		print "Your gpu is of gamme %d of its series, its series starts from %d W to %d W, we assume that its max consumption is %d W" % (rangeingamme,gpumin,gpumax,gpu)
-
-	gpuload = 0.1
-	
-	gc = gpu * (0.2 + gpuload * 0.8)
-	if verbose:
-		print "Your gpu has a load of %f, assuming %f Watts " % (gpuload,gc)
-else:
-	#Vendor could not be found or internal chipset, assuming internal chipset (not much consumption)
+if (win):
 	gc = 1.5 if (mobile) else 3
-	if verbose:
-		print "Vendor of graphic card could not be found or internal chipset, assuming %d Watt" % gc
+else :
+	card = subprocess.check_output("lspci | grep -i vga", shell=True).strip()
+
+	if "nvidia" in card.lower():
+		card = re.search( ".*:([a-z0-9 \[\]]+)", card, re.I ).group(1)
+
+		newcard = re.search("([0-9]{3,4})(M)?",card,re.I)
+		mobilegpu = newcard.group(2)
+
+		#Searching the max consumption according to the gamme
+		if mobilegpu:
+			gpumin = 5 #Max consumptin of a low-gam mobile GPU
+			gpumax = 60 #Max consumption of better mobile GPU
+		else:
+			gpumin = 15 #Idem for desktops GPUs. Remember it is the max consumption of the GPU
+			gpumax = 200
+
+		model = int(newcard.group(1))
+		#The old series of gpu have 4 number
+		if (model>1000):
+			gpumax = gpumax * 0.7 #Old GPU use less power
+			model = model/10
+		rangeingamme = (model % 100) / 10.0 #Number from 0 to 10 representing the level in gam
+		
+		#Max consumption is exponential with the gamme
+		gpu = gpumin + ((1-(log(11-rangeingamme)/log(11))) * (gpumax-gpumin))
+
+		if verbose:
+			print "Your gpu is of gamme %d of its series, its series starts from %d W to %d W, we assume that its max consumption is %d W" % (rangeingamme,gpumin,gpumax,gpu)
+
+		gpuload = 0.1
+		
+		gc = gpu * (0.2 + gpuload * 0.8)
+		if verbose:
+			print "Your gpu has a load of %f, assuming %f Watts " % (gpuload,gc)
+	else:
+		#Vendor could not be found or internal chipset, assuming internal chipset (not much consumption)
+		gc = 1.5 if (mobile) else 3
+		if verbose:
+			print "Vendor of graphic card could not be found or internal chipset, assuming %d Watt" % gc
 	
 energy.append(gc)
 
 #Fans
 nfan = 0
-command = "cat /sys/class/thermal/cooling_device*/cur_state"
-all_info = subprocess.check_output(command, shell=True).strip()
-for line in all_info.split("\n"):
-	if (float(line) >= 1):
-		nfan += 1;
+if (not win):
+	command = "cat /sys/class/thermal/cooling_device*/cur_state"
+	all_info = subprocess.check_output(command, shell=True).strip()
+	for line in all_info.split("\n"):
+		if (float(line) >= 1):
+			nfan += 1;
 
 if (mobile and nfan==0):
 	nfan = 1

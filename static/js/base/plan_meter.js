@@ -80,30 +80,49 @@ function meterModeSelector(meter, callback) {
 	//If the meter is a state, the mode is set to INS
 	if (meter.energy.type=='STATE') {
 		meter.mode='INS';
-		callback(meter);
-		return;
-	}
-		
-	var q = $('<div class="mode_chooser">Please select the mode of the meter :<br /></div>');
-	for ( var i = 0; i < meter_modes.length; i++) {
-		
-		var mode = $('<div class="mode_choice"><div class="image"><img class="" src="/static/img/meters/mode_'
-				+ meter_modes[i][0].toLowerCase()
-				+ '.png" alt="'
-				+ meter_modes[i][1]
-				+ '"/></div><div>'
-				+ meter_modes[i][1]
-				+ '</div></div>');
-		
-		(function(l){mode.click(function(event) {
+		var q = $('<div class="mode_chooser">What to do when you change the value on USE Monitoring?<br /></div>');
+		var nothing = $('<input type="radio" value="" id="onUpdate" />');
+		var http = $('<input type="radio" value="http" id="onUpdate" />');
+		var httpUrl = $('<input type="text" value="http://server.com/set?meter=%hash%&val=%value%" id="http" /><br />');
+		var create = $('<input type="button" value="Create" />');
+		q.append(nothing).append(' Nothing<br />');
+		q.append(http).append(' Http request :<br />').append(httpUrl);
+		q.append(create);
+		create.click(function(event) {
 			$('.overlay').remove();
-			
-			meter.mode = meter_modes[l][0];
+			var options = '';
+			if (http.is(":checked")) {
+				options = '\'http\':\'' + httpUrl.val() + '\'';
+			}
+
+			meter.options = '{\'onUpdate\':{' + options + '}}';
 			callback(meter);
-		});}(i));
-		q.append(mode);
+		});
+
+		modal (q);
+	} else {
+		meter.options = '';
+		var q = $('<div class="mode_chooser">Please select the mode of the meter :<br /></div>');
+		for ( var i = 0; i < meter_modes.length; i++) {
+
+			var mode = $('<div class="mode_choice"><div class="image"><img class="" src="/static/img/meters/mode_'
+					+ meter_modes[i][0].toLowerCase()
+					+ '.png" alt="'
+					+ meter_modes[i][1]
+					+ '"/></div><div>'
+					+ meter_modes[i][1]
+					+ '</div></div>');
+
+			(function(l){mode.click(function(event) {
+				$('.overlay').remove();
+
+				meter.mode = meter_modes[l][0];
+				callback(meter);
+			});}(i));
+			q.append(mode);
+		}
+		modal(q);
 	}
-	modal(q);
 }
 
 function createDropables(plan) {

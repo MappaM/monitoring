@@ -2,11 +2,12 @@
  * models.js
  * Contains the javascript implementation of the django models
  */
-var Meter = function(energy, mode, hash, appliance_link) {
+var Meter = function(energy, mode, hash, appliance_link, options) {
 	this.energy = energy;
 	this.mode = mode;
-	this.hash = hash;
+	this.hash = hash;	
 	this.appliance_link = appliance_link;
+	this.options = options;
 };
 
 var ApplianceLink = function(appliance, center, values, floor) {
