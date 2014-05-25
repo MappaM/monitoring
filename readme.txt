@@ -4,7 +4,7 @@ Linux :
 - Python
 - Python-mysqldb
 - pytz
-- yuglify
+- yuglify --> npm install yuglify
 
 Python :
 - pip install django

@@ -14,7 +14,8 @@ framework.
 
 """
 import os
-
+import sys
+sys.path.append('/home/tom/public_html/monitoring/')
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "monitoring.settings")
 
 # This application object is used by any WSGI server configured to use this

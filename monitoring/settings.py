@@ -3,7 +3,7 @@ import os;
 
 PROJECT_PATH = os.path.dirname(os.path.abspath('__file__'))
 
-DEBUG = True
+DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -70,7 +70,8 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    os.path.join(PROJECT_PATH,'static'),
+#    os.path.join(PROJECT_PATH,'static'),
+	'/home/tom/public_html/monitoring/static/',
     
 )
 
@@ -94,9 +95,14 @@ TEMPLATE_LOADERS = (
 #     'django.template.loaders.eggs.Loader',
 )
 
+STATICFILES_STORAGE = 'pipeline.storage.PipelineStorage'
+
+#STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
+
 TEMPLATE_CONTEXT_PROCESSORS = (
+  'django.contrib.auth.context_processors.auth',
   'django.core.context_processors.request',
-  'django.contrib.auth.context_processors.auth')
+)
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
@@ -279,12 +285,14 @@ PIPELINE_JS = {
                     'js/base/global.js',
                     'js/models/models.js',
                     'js/jquery.sizes.js',
-                    'js/jquery-ui.custom.js',
+		    'js/jquery-ui.custom.js',
                     'js/jquery.simplemodal.min.js'
                                   ),
               'output_filename': 'js/base/global.min.js',
             }
 }
+
+PIPELINE_DISABLE_WRAPPER = True
 
 MAIL_FROM = "tom.barbette@student.ulg.ac.be"
 

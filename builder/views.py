@@ -124,13 +124,13 @@ def floors_get(request, house_id):
 @permission_required('builder.edit_house')
 def stage4(request): 
     house = shortcuts.get_object_or_404(House, id=request.session['house'])
-    floors = Floor.objects.filter(house=house)
+    floors = Floor.objects.filter(house=house) 
     context = { 'title':'Wall',
                 'house_id':house.id,
                 'floor_types':Floor.FLOOR,
                 'floors':serializers.serialize("json", floors,use_natural_keys=True),
                 'house':house,
-                'plan_params':'showBackWalls:true,',} 
+                'plan_params':'showBackWalls:true,'} 
     return render(request, 'builder/stage4.html', context)
 
 @permission_required('builder.edit_house')
