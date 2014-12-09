@@ -9,26 +9,40 @@ import argparse
 from threading import Thread
 from time import sleep
 import urllib2
+import thread
+import threading
 
-devices = [ (0,"telldus","Chaufferette"), #1
+
+devices = [ (0,"telldus","Appareil electro"), #1
             (1,"telldus","Haut"), #2
-            (2,"telldus","Webcam"), #3
+            (2,"telldus","Ordinateur"), #3
             (1,"relay","Lampe bas"), #4
             (4,"relay","Bloc gauche"), #5
             (2,"relay","Radiateur"), #6
             (8,"relay","Bloc droit"), #7
             (16,"relay","Lampe bureau"), #8
-            (0,"motion","Webcam 2")] #9
+	    (32,"relay","Webcam 1"), #9
+#	    (64,"relay","Lampe cuisine"), #10
+#	    (128,"relay","Routeur"), #11
+#	    (256,"relay","Ports USB"), #12
+            (0,"motion","Webcam 2"), #10
+	    (3,"telldus","Chaufferette"), #11
+            (4,"telldus","Bas"), #12
+            ("/tmp/presence","fichier","Presence"), #13
+            ("/tmp/sleeping","fichier","Sleeping"),] #14
 
 
-groups = {  
-            'Home':(-3,4,5,-6,7,8,-9),
-            'Sleep':(-1,-2,-3,-4,-5,-7,-8,-9),
-            'default':(-1,-2,3,-4,-5,-6,-7,-8,9)}
-    
+groups = {
+            'Home':(1,4,5,-6,7,8,-9,-10,13),
+            'Sleep':(-1,-2,-9,-4,-5,-7,-8,-10,-12,13,14),
+            'default':(-1,-2,9,-4,-5,-6,-7,-8,10,-12,-13,-14)}
+
+lock = threading.Lock()
+tlock = threading.Lock()
+
 class Group:
     name = "group"
-    
+
     @staticmethod
     def command(command,group_id):
             resp = ""
@@ -36,7 +50,7 @@ class Group:
                 group = groups[group_id]
             else:
                 group = groups['default']
-            
+
             for did in group:
                 device = devices[abs(did) - 1]
                 if (did < 0):
@@ -44,70 +58,89 @@ class Group:
                 else:
                     c = command
 
-                modules[device[1]].command(c,device[0])
-                resp += device[2] + " is now " + str(c) + "<br />" 
+                thread.start_new_thread(modules[device[1]].command,(c,device[0]))
+                resp += device[2] + " is now " + str(c) + "<br />"
             print resp
             return resp
-            
-class Telldus:
-    name = "telldus"
-    
+
+class Fichier:
+    name = "fichier"
+
     @staticmethod
     def command(command,device_id):
+        if ((command == "E") or (command == "0") or (command == 0) or (command == "OFF") or (command == False)):
+            command = 0
+        else:
+            command = 1
+        f = open(str(device_id), 'w')
+        f.write(str(command))
+        f.close()
+        return str(device_id) + " is now " + str(command)
+
+
+class Telldus:
+    name = "telldus"
+
+    @staticmethod
+    def command(command,device_id):
+	tlock.acquire(True)
         if ((command == "E") or (command == "0") or (command == 0) or (command == "OFF") or (command == False)):
             command = False
         else:
             command = True
-        
+
         core = TelldusCore()
         d = core.devices()[device_id]
         if (not command):
             d.turn_off()
         elif (command):
             d.turn_on()
-        return d.name + " is now " + str(command) 
-        
+	tlock.release()
+        return d.name + " is now " + str(command)
+
 class Motion:
     name = "motion"
-    
+
     @staticmethod
     def command(command,device_id):
         if ((command == "E") or (command == "0") or (command == 0) or (command == "OFF") or (command == False)):
             command = False
         else:
             command = True
-        
+
         try:
             if (not command):
                 surl = "/"+str(device_id) +"/detection/pause"
             elif (command):
-                surl = "/" + str(device_id) +"/detection/start"      
+                surl = "/" + str(device_id) +"/detection/start"
             import httplib
             conn = httplib.HTTPConnection(host='127.0.0.1',port=8080,timeout=5)
             conn.request('GET',surl)
             content = conn.getresponse().read()
-            print "Calling " + surl            
-            
+            print "Calling " + surl
+
         except:
-            pass    
-        return "Webcam " + str(device_id) + " is now " + str(command) 
-        
+            pass
+        return "Webcam " + str(device_id) + " is now " + str(command)
+
 class Relay:
     name = "relay"
-    
+
     @staticmethod
     def command(command,device_id):
+	lock.acquire(True)
         if (command == "0" or command == False):
             command = "E"
         elif (command == "1" or command == True):
             command = "A"
         relay.relay_command(command,device_id)
+	lock.release()
         return str(device_id) + " is now " + command
 
-modules = {"relay":Relay,"telldus":Telldus,"motion":Motion}
+modules = {"relay":Relay,"telldus":Telldus,"motion":Motion,"fichier":Fichier}
 
 class MyHandler(SimpleHTTPRequestHandler):
-    protocol_version = "HTTP/1.1"
+    protocol_version = "HTTP/1.0"
 
     def r404(self):
         self.send_response(404)
@@ -115,26 +148,26 @@ class MyHandler(SimpleHTTPRequestHandler):
 
     def __init__(self,req,client_addr,server):
             SimpleHTTPRequestHandler.__init__(self,req,client_addr,server)
-            
-    def do_GET(self):    
+
+    def do_GET(self):
         self._do_GET(True)
 
     def do_HEAD(self):
-	self._do_GET(False)        
+	self._do_GET(False)
 
     def _do_GET(self,write):
-        print 'get'
         uri = parse_qs(urlparse(self.path).query)
         print uri
         if (not 'module' in uri) or (uri["module"]!=["list"] and ((not 'id' in uri) or (not 'c' in uri))):
-                 return self.r404()
+            print "Unknown request"
+            return self.r404()
         resp = ""
-        
+
         if 'host' in  self.headers:
             addr = "http://" + self.headers['host'] + "/"
         else:
             addr = SERVER_ADDRESS
-        
+
         if (uri["module"] == ["relay"]):
             device_id = int(uri['id'][0])
             command = uri['c'][0]
@@ -147,30 +180,34 @@ class MyHandler(SimpleHTTPRequestHandler):
             device_id = int(uri['id'][0])
             command = uri['c'][0]
             resp = Motion.command(command,device_id)
+        elif (uri["module"] == ["fichier"]):
+            device_id = str(uri['id'][0])
+            command = uri['c'][0]
+            resp = Fichier.command(command,device_id)
 
         elif (uri["module"] == ["group"]):
             group_id = uri['id'][0]
             command = uri['c'][0]
-                        
+
             resp = Group.command(command,group_id)
         elif (uri["module"] == ["list"]):
             resp += "<table style=\"font-size:28px;\">"
             for device in devices:
                 resp += "<tr><td>" +str (device[2]) + " <a href=\""+addr+"?module=" + device[1] + "&id=" + str(device[0]) + "&c=1&back=1\">ON</a></td><td>" +str (device[2]) + " <a href=\""+addr+"?module=" + device[1] + "&id=" + str(device[0]) + "&c=0&back=1\">OFF</a><br /></td></tr>"
             for group in groups:
-                resp += "<tr><td>" +str (group) + " <a href=\""+addr+"?module=group&id=" + str(group) + "&c=1&back=1\">ON</a></td><td>" +str (group) + " <a href=\""+addr+"?module=group&id=" + str(group) + "&c=0&back=1\">OFF</a><br /></td></tr>"
+                resp += "<tr><td colspan=\"2\"><a href=\""+addr+"?module=group&id=" + str(group) + "&c=1&back=1\" >" + str(group) + " </a><br /></td></tr>"
             resp += "</table>"
         else:
             return self.r404()
-            
+
         if (resp == 404):
             self.r404()
         resp += "<br/><br /><a href=\"javascript:history.go(-1);\">Back</a>"
-        
+
         if ('back' in uri):
             resp += "<script type=\"text/javascript\">window.location.replace('/?module=list&c=0&id=0');</script>"
-            
-        resp = "<!DOCTYPE html><html><head></head><body style=\"font-size:28px;\"><div>" + resp + "</div></body></html>" 
+
+        resp = "<!DOCTYPE html><html><head></head><body style=\"font-size:28px;\"><div>" + resp + "</div></body></html>"
         self.rfile._sock.settimeout(5)
         self.wfile._sock.settimeout(5)
         self.send_response(200)
@@ -179,6 +216,7 @@ class MyHandler(SimpleHTTPRequestHandler):
         self.end_headers()
         if (write):
 		self.wfile.write(resp)
+		self.wfile.flush()
 
 
 class HTTPServerV6(BaseHTTPServer.HTTPServer):
@@ -186,24 +224,23 @@ class HTTPServerV6(BaseHTTPServer.HTTPServer):
     def get_request(self):
         self.socket.settimeout(5.0)
         result = None
-        print "timeout"
         while result is None:
             try:
                 result = self.socket.accept()
             except socket.timeout:
                 pass
-        result[0].settimeout(None)
-        return result    
+        result[0].settimeout(5)
+        return result
 
 def main():
 
     parser = argparse.ArgumentParser(description='Light http server for domotic relay')
-    parser.add_argument('-a','--host', 
+    parser.add_argument('-a','--host',
                         action='store',
                         dest="SERVER_HOST",
                         default="localhost",
                         help='the host address to access this server')
-    parser.add_argument('-p', '--port', 
+    parser.add_argument('-p', '--port',
                         action='store',
                         dest="SERVER_PORT",
                         default=7272,
@@ -225,5 +262,5 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
+
 

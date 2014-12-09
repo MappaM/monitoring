@@ -1,7 +1,7 @@
 #!/bin/python
 # Return the approximated consumption of a computer where the interface is running on
-#python dependency  : pywapi psutil 
-#program dependency hdparm 
+#python dependency  : pywapi psutil
+#program dependency hdparm
 
 import sys
 import os, subprocess, re
@@ -35,6 +35,10 @@ if (mobile):
 	if verbose:
 		print "You appear to be on a laptop"
 
+embedded = re.search("arm",get_processor_name(),re.I)
+if (embedded):
+        if verbose:
+                print "You appear to be on an embedded device"
 #Processor load
 load = (psutil.cpu_percent()/100)
 loadexp = (load * load)
@@ -42,11 +46,12 @@ if verbose:
 	print "Your system load is %.2f" % load
 
 #Hard drives
-all_info = subprocess.check_output("ls /dev/sd[a-z]", shell=True).strip()
-if (platform.system()=="Windows"):
-    for drive in all_info.split("\n"):
-	 if mobile:
-		if verbose:
+try:
+    all_info = subprocess.check_output("ls /dev/sd[a-z]", shell=True).strip()
+    if (platform.system()=="Windows"):
+        for drive in all_info.split("\n"):
+	     if mobile:
+	    	if verbose:
                 	print "HDD Detected. Assuming 2Watt"
                         p = 2
                 else:
@@ -54,10 +59,10 @@ if (platform.system()=="Windows"):
                              print "HDD Detected. Assuming 6Watt"
                              p = 6
                         energy.append(p * (load/2 + 0.5))
-else:
-    for drive in all_info.split("\n"):
-	try:
-		dev_info = subprocess.check_output("hdparm -I " + drive, shell=True).strip()
+    else:
+        for drive in all_info.split("\n"):
+            try:
+	    	dev_info = subprocess.check_output("hdparm -I " + drive, shell=True).strip()
 		ssd = False
 		for hi in dev_info.split("\n"):
 			if "Solid State Device" in hi:
@@ -67,8 +72,8 @@ else:
 				print "SSD Detected. Assuming 0.8Watt"
 			energy.append(0.8)
 		else:
-			if mobile:	
-				if verbose:		
+			if mobile:
+				if verbose:
 					print "HDD Detected. Assuming 2Watt"
 				p = 2
 			else:
@@ -76,17 +81,20 @@ else:
 					print "HDD Detected. Assuming 6Watt"
 				p = 6
 			energy.append(p * (load/2 + 0.5))
-	except subprocess.CalledProcessError:
+            except subprocess.CalledProcessError:
 		#An error could appear if it's not really a disk, like a usb stick or cdrom, we count 0.5W for these
 		energy.append(0.5)
-
+except subprocess.CalledProcessError:
+    if (verbose):
+        "Assuming no HDD"
 
 
 #Motherboard and memory
 nslot = 0
 if (win):
-	nsolt = 3	
+	nsolt = 3
 else:
+    try:
 	memory_slots = subprocess.check_output("dmidecode  -t 17 | grep Size", shell=True).strip()
 	nslot = 0
 	for slot in memory_slots.split("\n"):
@@ -97,15 +105,19 @@ else:
 			energy.append(memcons)
 			if verbose:
 				print "Memory of %d detected. Assuming %fWatt" % (int(mem.group(1)), memcons)
+    except subprocess.CalledProcessError:
+        pass;
 
-if (mobile):
+if (embedded):
+        energy.append(2)
+elif (mobile):
 	energy.append(8)
 elif nslot <= 2:
 	energy.append(20)
 else:
 	energy.append(30)
-	
-	
+
+
 #Screen
 mon = 0
 if (win):
@@ -117,10 +129,11 @@ else:
 			if (mobile):
 				mon = 3
 			else:
-				mon = 8		
+				mon = 8
 			if verbose:
 				print "Monitor is On. Assuling %dWatt" % mon
-	except: #Cannot access xset if no display, assuming on...
+	except: #Cannot access xset if no display, assuming on if not embedded..
+            if (not embedded):
 		if (mobile):
 			mon = 3
 		else:
@@ -128,11 +141,12 @@ else:
 		if verbose:
 				print "Monitor is probably On. Assuming %dWatt" % mon
 energy.append(mon)
-			
+
 #Graphic card
 if (win):
 	gc = 1.5 if (mobile) else 3
 else :
+    try:
 	card = subprocess.check_output("lspci | grep -i vga", shell=True).strip()
 
 	if "nvidia" in card.lower():
@@ -155,7 +169,7 @@ else :
 			gpumax = gpumax * 0.7 #Old GPU use less power
 			model = model/10
 		rangeingamme = (model % 100) / 10.0 #Number from 0 to 10 representing the level in gam
-		
+
 		#Max consumption is exponential with the gamme
 		gpu = gpumin + ((1-(log(11-rangeingamme)/log(11))) * (gpumax-gpumin))
 
@@ -163,7 +177,7 @@ else :
 			print "Your gpu is of gamme %d of its series, its series starts from %d W to %d W, we assume that its max consumption is %d W" % (rangeingamme,gpumin,gpumax,gpu)
 
 		gpuload = 0.1
-		
+
 		gc = gpu * (0.2 + gpuload * 0.8)
 		if verbose:
 			print "Your gpu has a load of %f, assuming %f Watts " % (gpuload,gc)
@@ -172,7 +186,8 @@ else :
 		gc = 1.5 if (mobile) else 3
 		if verbose:
 			print "Vendor of graphic card could not be found or internal chipset, assuming %d Watt" % gc
-	
+    except subprocess.CalledProcessError:
+        gc = 0
 energy.append(gc)
 
 #Fans
@@ -188,7 +203,7 @@ if (mobile and nfan==0):
 	nfan = 1
 
 #---The power fan of desktop is nearly never monitored
-if (not mobile):
+if (not mobile and not embedded):
 	nfan += 1
 if verbose:
 	print "You appear to have %d fan." % nfan
@@ -200,14 +215,14 @@ model = get_processor_name()
 processor_energy = -1
 while (processor_energy == -1): #Intel sometimes return a 500 error. We just have to retry 5 to 10 times...
 	try:
-		if (re.search( "intel", model, re.I)):		
+		if (re.search( "intel", model, re.I)):
 			modelstripped = re.sub( "\(r\)|\(tm\)|intel|[@][ ]?[0-9]+.[0-9]+[kmghz]+|cpu|celeron|\t", " ", model,0,re.I).strip()
 			if verbose:
 				print "Intel processor detected : " + modelstripped
 			url = "http://ark.intel.com/search?q="+re.sub("[ ]+","+",modelstripped)
-		
+
 			content = urllib2.urlopen(url).read()
-			
+
 			tdp = re.search("([0-9]+) W",content,re.I | re.M)
 			if tdp:
 				processor_energy = float(tdp.group(1))
@@ -230,13 +245,16 @@ while (processor_energy == -1): #Intel sometimes return a 500 error. We just hav
 					if verbose:
 						print "Processor model could not be find on intel.com, assuming MAX TDP 65Watt"
 					processor_energy = 65
-
+                elif re.search('ARMv7',model,re.I):
+                    if verbose:
+                        print "ARM Processor, assuming 5W"
+                    processor_energy = 5
 		else:
 			if verbose:
 				print "Processor manufacturer unknow, assuming MAX TDP 65Watt"
 			processor_energy = 65
 	except urllib2.HTTPError:
-		processor_energy = -1;	
+		processor_energy = -1;
 
 #TDP to real consumption conversion
 if (mobile):
