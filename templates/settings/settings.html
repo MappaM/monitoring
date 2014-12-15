@@ -4,7 +4,7 @@
 	<script type="text/javascript">
 		function save() {
 			var inputs = new Object();
-			$('#profile_form input').each(function() {
+			$('#profile_form input,#profile_form select').each(function() {
 				var id = $(this).attr('name');
 				if ($(this).attr('type')=='checkbox')
 					inputs[id] = $(this).is(':checked');
@@ -14,8 +14,8 @@
 			$.ajax(	{	url:'/settings/save_profile',
 						method:'post',
 						data:'csrfmiddlewaretoken={{csrf_token}}&data=' + JSON.stringify(inputs),
-						success:function() {
-							$('#result_box').hide().html("Saved...").show(500).delay(3000).hide(1500);
+						success:function(d) {
+							$('#result_box').hide().html( "Saved...").show(500).delay(3000).hide(1500);
 						}
 					});
 		}
@@ -24,6 +24,12 @@
 	<form method="post" action="/settings/" id="profile_form">
 		<input type="checkbox" value="1" name="advanced" {% if profile.advanced %}checked="checked"{% endif %} onclick="save()"/> I am an advanced user<br />
 		<input type="checkbox" value="1" name="autoscroll" {% if profile.autoscroll %}checked="checked"{% endif %} onclick="save()"/> Enable autoscroll<br />
+	<select name="default_house" style="" onchange="save()">
+	     <option value="" {% if not profile.default_house_id %} selected="selected" {% endif %}>Always let me choose</option>
+    {% for h in house_list %}
+        <option value="{{h.id}}" {% if h.id == profile.default_house_id %} selected="selected" {% endif %}>{{h.name}}</option>
+    {% endfor %}
+</select>
 	</form> <div id="result_box" style="color:blue"></div>
 	
 	<a href="/logout">Logout myself</a>

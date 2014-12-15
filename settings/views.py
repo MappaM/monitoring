@@ -3,20 +3,22 @@ from django.shortcuts import redirect
 from django.template import RequestContext
 from django.forms.models import modelformset_factory
 from forms import ApplianceTypeForm,UserForm,EnergyForm
-from builder.models import ApplianceType,Energy
+from builder.models import ApplianceType,Energy,House
 from django.contrib.auth.decorators import login_required,permission_required
 import json
 from django.http import HttpResponse
 from main.models import Profile
 from django.contrib.auth.models import User
+from django.forms import widgets
 
 @login_required
 def main(request):  
     """Main view of settings, basically user profile and a menu to choose other pages"""
     p, created = Profile.objects.get_or_create(user = request.user)
+    house_list = House.objects.all()
     if created:
         p.save()
-    return render(request, 'settings/settings.html', RequestContext(request,{'profile':p}))
+    return render(request, 'settings/settings.html', RequestContext(request,{'profile':p,'house_list':house_list}))
 
 @permission_required('builder.edit_house')
 def appliances(request):
