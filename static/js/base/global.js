@@ -76,8 +76,7 @@ function object_to_request(obj, prefix, suffix) {
 			} else
 				request += object_to_request(obj[property], prefix+ property + '_', suffix);
 		else if (typeof obj[property] !== 'function') {
-			
-			request += '&' + prefix + property + suffix + '=' + obj[property];
+			request += '&' + prefix + property + suffix + '=' + encodeURIComponent(obj[property]);
 		}
 	}
 	return request;
@@ -169,7 +168,7 @@ function jsonStripModel(model) {
 				al = null;
 			else
 				al = jsonStripModel(new Array(model[i].fields.appliance_link))[0]; 
-			obj = new Meter(jsonStripModel(new Array(model[i].fields.energy))[0],model[i].fields.mode,model[i].fields.hash,al);
+			obj = new Meter(jsonStripModel(new Array(model[i].fields.energy))[0],model[i].fields.mode,model[i].fields.hash,al,model[i].fields.options);
 			
 			
 		} else if (model[i].model == 'builder.energy') {

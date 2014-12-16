@@ -324,6 +324,7 @@ def meters_save(request, house_id):
         m.energy = Energy.objects.get(pk=request.POST['meter_energy_pk' + str(i)])
         m.mode = request.POST['meter_mode' + str(i)]
         m.hash = request.POST['meter_hash' + str(i)]
+        m.options = request.POST['meter_options' + str(i)]
         if (request.POST.get('meter_appliance_link'+ str(i), -1) == -1):
             m.appliance_link = ApplianceLink.objects.get(pk=request.POST['meter_appliance_link_pk' + str(i)])
         else:

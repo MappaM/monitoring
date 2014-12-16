@@ -80,11 +80,25 @@ function meterModeSelector(meter, callback) {
 	//If the meter is a state, the mode is set to INS
 	if (meter.energy.type=='STATE') {
 		meter.mode='INS';
+		var httpUrl = false;
+		var options;
+		if (meter.options && meter.options != "undefined") {
+			options = $.parseJSON(meter.options);
+			options.edited = true;
+			if ("http" in options.onUpdate)
+				httpUrl = options.onUpdate.http; 
+		} else {
+			options = {onUpdate:{}}; 
+			options.edited = false;
+		}
+		if (!httpUrl) {
+			httpUrl = 'http://server.com/set?meter=%hash%&val=%value%';
+		}
 		var q = $('<div class="mode_chooser">What to do when you change the value on USE Monitoring?<br /></div>');
-		var nothing = $('<input type="radio" value="" id="onUpdate" />');
-		var http = $('<input type="radio" value="http" id="onUpdate" />');
-		var httpUrl = $('<input type="text" value="http://server.com/set?meter=%hash%&val=%value%" id="http" /><br />');
-		var create = $('<input type="button" value="Create" />');
+		var nothing = $('<input type="radio" value="" id="onUpdate" name="onUpdate" '+((Object.keys(options.onUpdate).length === 0)?'checked="checked"':'')+'/>');
+		var http = $('<input type="radio" value="http" id="onUpdate" name="onUpdate" '+(("http" in options.onUpdate)?'checked="checked"':'')+' />');
+		var httpUrl = $('<input type="text" value="'+httpUrl+'" id="http" /><br />');
+		var create = $('<input type="button" value="'+(options.edited?'Save':'Create')+'" />');
 		q.append(nothing).append(' Nothing<br />');
 		q.append(http).append(' Http request :<br />').append(httpUrl);
 		q.append(create);
@@ -92,14 +106,12 @@ function meterModeSelector(meter, callback) {
 			$('.overlay').remove();
 			var options = '';
 			if (http.is(":checked")) {
-				options = '\'http\':\'' + httpUrl.val() + '\'';
+				options = '"http":"' + httpUrl.val() + '"';
 			}
-
-			meter.options = '{\'onUpdate\':{' + options + '}}';
+			meter.options = '{"onUpdate":{' + options + '}}';
 			callback(meter);
 		});
-
-		modal (q);
+		modal(q);
 	} else {
 		meter.options = '';
 		var q = $('<div class="mode_chooser">Please select the mode of the meter :<br /></div>');
@@ -308,7 +320,6 @@ function refreshMeters(plan) {
 				var point = plan.renderer.getVirtualPosition(leftOffset
 						+ (sharedSpace * (c + 0.5)), plan.onemeter * plan.meterSize/2);
 				var nearestWall = plan.getNearestExternalWall(point);
-				
 				metersToDraw.push({
 					'meter' : m,
 					'position' : new Position(point),
@@ -334,7 +345,7 @@ function refreshMeters(plan) {
 						+ Math.min(Math.max(9, dwidth / 6), 14)
 						+ 'px;"></div>');
 				mv.append(mvdrop);
-				mvdrop.append(energies_used[i].getMeterImage((dwidth - 8),(dwidth - 8)))
+				mvdrop.append(energies_used[i].getMeterImage((dwidth - 8),(dwidth - 8)));
 				mvdrop.append('<br />Overall '
 						+ energies_used[i].title.toLowerCase());
 				mvdrop.droppable({

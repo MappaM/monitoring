@@ -3,7 +3,7 @@ import os;
 
 PROJECT_PATH = os.path.dirname(os.path.abspath('__file__'))
 
-DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -71,7 +71,7 @@ STATICFILES_DIRS = (
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
 #    os.path.join(PROJECT_PATH,'static'),
-	'/home/tom/public_html/monitoring/static/',
+	'/home/tom/workspace/monitoring/static/',
     
 )
 
@@ -285,7 +285,6 @@ PIPELINE_JS = {
                     'js/base/global.js',
                     'js/models/models.js',
                     'js/jquery.sizes.js',
-		    'js/jquery-ui.custom.js',
                     'js/jquery.simplemodal.min.js'
                                   ),
               'output_filename': 'js/base/global.min.js',

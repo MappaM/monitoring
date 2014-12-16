@@ -45,6 +45,11 @@
 				opacity : 0.9,
 				revert : "invalid",
 			});
+			m.dblclick(function(e){
+				meterModeSelector(meter, function(meter) {
+                    refreshMeters(plan);
+                });
+            });
 		}
 		
 		//Retrieving list of consumable energies used in the house, and all state energies
