@@ -19,6 +19,14 @@ def menu(context):
         request.session['house'] = houses[0].id
         
     context['builder_only'] = (not isinstance(request.session.get('house',False),long)) or request.session['house']==0
+    if (not context['builder_only']):
+        house = House.objects.get(id=request.session.get('house'))
+        c = 0
+        for floor in house.floors.all():
+            c += floor.walls.all().count();
+        print c
+        if c == 0:
+            context['builder_only'] = True;
 
     return context
 

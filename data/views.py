@@ -15,6 +15,8 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import permission_required
 from django.views.decorators.cache import never_cache
 from django.db.models import Sum
+import urllib2
+
 #Add : add data to meter
 def add(request,hash,value):
     m = get_object_or_404(Meter,hash=hash)
@@ -23,6 +25,19 @@ def add(request,hash,value):
     reading.amount = float(value)
     reading.date = timezone.now()
     reading.save()
+    if (m.options):
+        options = json.loads(m.options);
+        if ("onUpdate" in options and "http" in options["onUpdate"]):
+            url = options["onUpdate"]["http"]
+            for k,v in {"%value%":value,"%hash%":hash}.iteritems():
+                url = url.replace(k,str(v))
+            try:
+                urllib2.urlopen(urllib2.Request(url))
+                return HttpResponse("Added successfully\nCalled successfully" + url)
+            except Exception:
+                return HttpResponse("Added successfully\nError while calling " + url)
+                pass
+            
     return HttpResponse("Added successfully")
 
 def get_last(request,hash,delta):
