@@ -17,9 +17,8 @@ def index(request):
     
     profile = request.user.get_profile()
     
-    if (profile and profile.default_house.id):
+    if (not "house" in request.session and profile and profile.default_house.id):
         request.session['house'] = profile.default_house.id
-
         
     return render(request, 'main/index.html', {'logs':Log.objects.all().order_by('-date')[:10],'housedefined': isinstance(request.session.get('house',False),long)})
 
@@ -27,8 +26,10 @@ def select_house(request, house_id):
     if (house_id.isdigit()):
         h = House.objects.get(id=house_id)
         request.session['house'] = h.id
+        request.session["house_has_wall"] = False
         return HttpResponse(h.id)
     else:
         request.session['house'] = ''
+        request.session["house_has_wall"] = False
         return HttpResponse('')
     
