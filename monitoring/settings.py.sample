@@ -3,6 +3,7 @@ import os;
 
 PROJECT_PATH = os.path.dirname(os.path.abspath('__file__'))
 
+#Change in production !
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -17,7 +18,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': 'monitor',                      # Or path to database file if using sqlite3.
         'USER': 'monitor',                      # Not used with sqlite3.
-        'PASSWORD': 'Ywv7yj8SexTwGt7A',                  # Not used with sqlite3.
+        'PASSWORD': 'Your password',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
     }
