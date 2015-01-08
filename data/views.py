@@ -20,7 +20,10 @@ import urllib2
 #Add : add data to meter
 def add(request,hash,value):
     m = get_object_or_404(Meter,hash=hash)
-    latest = m.readings.latest('date')
+    try:
+        latest = m.readings.latest('date')
+    except Exception:
+        latest = False
     reading = Reading()
     reading.meter = m
     reading.amount = float(value)
@@ -28,7 +31,7 @@ def add(request,hash,value):
     reading.save()
     if (m.options):
         options = json.loads(m.options);
-        if (latest.amount != reading.amount and "onUpdate" in options and "http" in options["onUpdate"]):
+        if (latest and latest.amount != reading.amount and "onUpdate" in options and "http" in options["onUpdate"]):
             url = options["onUpdate"]["http"]
             for k,v in {"%value%":value,"%hash%":hash}.iteritems():
                 url = url.replace(k,str(v))
@@ -62,9 +65,13 @@ def meter_consumption(request,hash,delta):
     meter = Meter.objects.select_related('energy').get(hash=hash)
     list = ReadingDay.objects.filter(meter=meter).order_by('date')
     data = []
+    last = -1
     for item in list:
-        data.append((int(time.mktime(item.date.timetuple())* 1000),float(item.amount)))
-
+        readingdate = int(time.mktime(item.date.timetuple())* 1000)
+        if (last >= readingdate):
+            readingdate = last + 1
+        last = readingdate
+        data.append((readingdate,float(item.amount)))
     return HttpResponse(json.dumps([data]), content_type="application/json")
 
 @permission_required('builder.view_house')
