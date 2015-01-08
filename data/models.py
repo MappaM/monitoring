@@ -118,20 +118,17 @@ class Reading(models.Model):
     def get_instant(meter,delta):
         """Return a list of instant consumption for the given meter during the given time (or since the beginning if no time is given)"""
         if (delta == None):
-            liste = Reading.objects.filter(meter=meter).order_by('date').order_by('id')
+            liste = Reading.objects.filter(meter=meter).order_by('date')
         else:
             liste = Reading.objects.filter(meter=meter,date__lte=datetime.datetime.now(),date__gte=(datetime.datetime.now() - datetime.timedelta(seconds=int(delta)))).order_by('date')
 
         import calendar;
         data = []
         last = -1
-        lastTime = -1
         count = 0
         for item in liste:
             count += 1
             temps = (int(calendar.timegm(item.date.timetuple()))* 1000)
-            if (lastTime == temps):
-                temps += 1
             if meter.mode == Meter.MODE_INSTANT:
                 if meter.energy.short_name == 'switch' and float(item.amount)!=last and last >-1:
                     data.append((temps,last))
@@ -144,5 +141,4 @@ class Reading(models.Model):
             elif meter.mode == Meter.MODE_DIFFERENCE:
                 if (lastTime > -1):
                     data.append((temps,((float(item.amount)) / (temps - lastTime)) * 3600000))
-            lastTime = temps
         return data
