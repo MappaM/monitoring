@@ -20,14 +20,17 @@ import urllib2
 #Add : add data to meter
 def add(request,hash,value):
     m = get_object_or_404(Meter,hash=hash)
-    try:
-        latest = m.readings.latest('date')
-    except Exception:
-        latest = False
     reading = Reading()
     reading.meter = m
     reading.amount = float(value)
     reading.date = timezone.now()
+    try:
+        latest = m.readings.latest('date')
+        if latest and reading.date >= latest.date:
+            reading.date = latest.date + datetime.timedelta(0,1)
+    except Exception:
+        latest = False
+
     reading.save()
     if (m.options):
         options = json.loads(m.options);
