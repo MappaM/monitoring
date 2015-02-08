@@ -7,7 +7,7 @@ from lockfile import LockFile
 def main():
     lock = LockFile("/tmp/relay")
     with lock:
-        ser = serial.Serial('/dev/ttyUSB0',9600,timeout=1)
+        ser = serial.Serial('/dev/ttyUSB0',19200,timeout=1)
         ser.flushInput()
         ser.write('t')
         s = ser.readline()

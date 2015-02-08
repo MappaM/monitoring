@@ -14,7 +14,7 @@ http_url = {2:("http://monitor.tombarbette.be/data/ZoD4Opi5N0xK/",2.0)}
 
 #We keep a cache of the last status of the relays
 last_status_file = '/home/tom/status/relay'
-
+log_file = '/home/tom/status/log'
 def set_last_status(status):
     f = open( last_status_file, 'w+' )
     f.write(status)
@@ -39,6 +39,8 @@ def get_current_status():
 
 def update_status(rid,command):
     r = get_last_status()
+    if (not r):
+        return False;
     if (command == 'A' or command=='E'):
         ix = len(r) - int(math.log(int(rid),2)) - 2
         rs = list(r)
@@ -51,18 +53,19 @@ def update_status(rid,command):
     set_last_status(r)
 
 def relay_status(device_id):
-    #r = get_current_status()
     #if len(r) < 16: #An error occured
 
     r = get_last_status()
 
-    if (r == -1):
+    if (r == -1 or r == False):
         print "Unable to get relay status !"
         return -1
 
     set_last_status(r)
 
     ix = len(r) - int(math.log(int(device_id),2)) - 2
+    if (ix < 0 or ix >= len(r)):
+        return -1
     return (int(r[ix]) == 1)
 
 def relay_command(command,rid):
@@ -77,12 +80,13 @@ def relay_command(command,rid):
     lock = LockFile("/tmp/relay", timeout=5)
     try:
         with lock:
-            ser = serial.Serial('/dev/ttyUSB0',9600,timeout=1)
+            log = open(log_file,"a")
+            log.write(str(command) + " " + str(rid) + "\n")
+            log.close()
+            ser = serial.Serial('/dev/ttyUSB0',19200,timeout=1)
             ser.flush()
             ser.write(command)
             if (rid >= 0):
-    	        #print (rid >> 8) & 0xff
-                #print (rid     ) & 0xff
                 ser.write(chr((int(rid) >> 8) & 0xff))
                 ser.write(chr((int(rid)     ) & 0xff))
             else:
@@ -107,9 +111,11 @@ def relay_command(command,rid):
 
 def main():
     if (len(sys.argv) > 2):
-        print relay_command(sys.argv[1][0],int(sys.argv[2]));
+        resp = relay_command(sys.argv[1][0],int(sys.argv[2]));
     else:
-        print relay_command(sys.argv[1][0],-1);
+        resp = relay_command(sys.argv[1][0],-1);
+    if (resp):
+        print resp
 
 if __name__ == "__main__":
     main()
