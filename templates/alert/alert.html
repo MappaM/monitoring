@@ -3,8 +3,8 @@
 {% block title %}Alerts{% endblock %}
 
 {% block content %}
-	{% load compressed %}
-	{% compressed_css 'alert' %}
+	{% load pipeline %}
+	{% stylesheet 'alert' %}
 	<h1>Alert</h1>
 	<div id="alert_zone">
 		<div id="piece_zone" style="display:none;overflow:hidden;">
@@ -84,10 +84,10 @@
 
 	</script>
 	<script type="text/javascript" src="/static/js/alert/alert.js"></script>
-	{% load compressed %}
-	{% compressed_js 'builder' %}
-	{% compressed_js 'plan' %}
-	{% compressed_js 'plan_appliance' %}
-	{% compressed_js 'plan_meter' %}	
+	{% load pipeline %}
+	{% javascript 'builder' %}
+	{% javascript 'plan' %}
+	{% javascript 'plan_appliance' %}
+	{% javascript 'plan_meter' %}	
 	&nbsp;
 {% endblock %}

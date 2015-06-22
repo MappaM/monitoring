@@ -1,9 +1,9 @@
 {% extends 'builder/stage.html' %}
 
 {% block stage %}
-	{% load compressed %}
-	{% compressed_js 'builder' %}
-	{% compressed_js 'plan' %}
+	{% load pipeline %}
+	{% javascript 'builder' %}
+	{% javascript 'plan' %}
 	<h1>Builder<div style="font-size:18px;font-family:'Noto Sans',sans-serif;">{{title}}</div></h1>
 	<div class="stage_content">
 	<link rel="stylesheet" type="text/css" media="all" href="/static/css/builder.css" />

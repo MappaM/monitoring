@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
 <head>
     <title>{% block title %}USE Monitoring{% endblock %}</title>
-    {% load compressed %}
-   	{% compressed_css 'base'%}
+    {% load pipeline %}
+   	{% stylesheet 'base'%}
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
     <!--[if lt IE 9]>
-	    {% compressed_js 'ie'%}
+	    {% javascript 'ie'%}
 	    <script type="text/javascript">
 	    	$(document).ready(function() {
 			    if (window.PIE) {
@@ -24,8 +24,8 @@
 	    </script>
 	    <link rel="stylesheet" type="text/css" media="all" href="/static/css/ie.css" />
     <![endif]-->
-   	{% compressed_js 'global'%}
-   	{% compressed_js 'touch-punch'%}
+   	{% javascript 'global'%}
+   	{% javascript 'touch-punch'%}
 </head>
 
 <body>
