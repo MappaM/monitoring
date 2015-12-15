@@ -33,9 +33,9 @@ devices = [ (0,"telldus","Appareil electro"), #1
 
 
 groups = {
-            'Home':(1,-2,4,5,-6,7,8,-10,13,-14), #-9 en temps normal
-            'Sleep':(-1,-4,-5,-7,-8,-10,-12,13,14),
-            'default':(-1,-2,9,-4,-5,-6,-7,-8,10,-12,-13,-14)}
+            'Home':(1,-2,4,5,-6,7,8,-9,-10,13,-14), #-9 en temps normal
+            'Sleep':(-1,-4,-5,-7,-8,-9,-10,-12,13,14),
+            'default':(-1,-2,-4,-5,-6,-7,-8,9,10,-12,-13,-14)}
 
 lock = threading.Lock()
 tlock = threading.Lock()
@@ -159,6 +159,7 @@ class MyHandler(SimpleHTTPRequestHandler):
 
     def r404(self):
         self.send_response(404)
+        self.end_headers()
         return
 
     def __init__(self,req,client_addr,server):
@@ -234,6 +235,7 @@ class MyHandler(SimpleHTTPRequestHandler):
         if (write):
 		self.wfile.write(resp)
 		self.wfile.flush()
+                self.wfile.close()
 
 
 class HTTPServerV6(BaseHTTPServer.HTTPServer):

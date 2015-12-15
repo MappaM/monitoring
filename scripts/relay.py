@@ -21,7 +21,7 @@ def set_last_status(status):
     f.close()
 
 def get_last_status():
-    #If status file is 5seconds  old, we re-read the status
+    #If status file is 5seconds old, we re-read the status
     if (datetime.datetime.now() - datetime.datetime.fromtimestamp(os.path.getmtime(last_status_file)) > datetime.timedelta(0,5)):
         return get_current_status()
     else:
@@ -30,17 +30,20 @@ def get_last_status():
             v = f.read()
             f.close()
         except IOError:
-            return -1
+            return False
     return v
 
 def get_current_status():
-    r = relay_command("G",-1)
+    try:
+        r = relay_command("G",-1)
+    except Exception:
+        return False
     return r
 
 def update_status(rid,command):
     r = get_last_status()
     if (not r):
-        return False;
+        return
     if (command == 'A' or command=='E'):
         ix = len(r) - int(math.log(int(rid),2)) - 2
         rs = list(r)
@@ -55,42 +58,64 @@ def update_status(rid,command):
 def relay_status(device_id):
     #if len(r) < 16: #An error occured
 
-    r = get_last_status()
+    retry = 0
 
-    if (r == -1 or r == False):
-        print "Unable to get relay status !"
-        return -1
+    while True:
+        r = get_last_status()
+        if (r == -1 or r == False):
+            retry+=1
+            if (retry >= 3):
+                print "Unable to get relay status, even after "+ str(retry) +" retry !"
+                return -1
+        else:
+            break
+
+    while True:
+        ix = len(r) - int(math.log(int(device_id),2)) - 2
+        if (ix < 0 or ix >= len(r)):
+            retry+=1
+            if (retry >= 3):
+                print "Relay status has unexpected length, even after " + str(retry) + " retry ..."
+                return -1
+        else:
+            break
 
     set_last_status(r)
 
-    ix = len(r) - int(math.log(int(device_id),2)) - 2
-    if (ix < 0 or ix >= len(r)):
-        return -1
     return (int(r[ix]) == 1)
 
+def stateless_command(command):
+    return (command == 'W' or command == 't' or command == 'T')
+
+
 def relay_command(command,rid):
-    if (rid and rid != -1):
+    if (rid and rid != -1 and not stateless_command(command)):
         state = relay_status(rid)
     else:
         state = -1
 
     if (command == 'g'):
+        if (state == -1):
+            print "Will return an invalid status"
         return '1' if state else '0'
 
     lock = LockFile("/tmp/relay", timeout=5)
     try:
         with lock:
             log = open(log_file,"a")
-            log.write(str(command) + " " + str(rid) + "\n")
-            log.close()
+            log.write(">" + str(command) + " " + str(rid) + "\n")
             ser = serial.Serial('/dev/ttyUSB0',19200,timeout=1)
             ser.flush()
             ser.write(command)
             if (rid >= 0):
                 ser.write(chr((int(rid) >> 8) & 0xff))
                 ser.write(chr((int(rid)     ) & 0xff))
+                log.close()
             else:
-                return ser.readline()
+                response = ser.readline()
+                log.write("<" + response + "\n")
+                log.close()
+                return response
     except LockTimeout:
         lock.break_lock()
     if state != -1 and (int(rid) in http_url):
@@ -99,14 +124,18 @@ def relay_command(command,rid):
         url = False
 
     if (url != False):
-        if (command == 'A' and not state):
-            urllib2.urlopen(url + str(float(0)))
-            urllib2.urlopen(url + str(float(consumption)))
-        elif (command == 'E' and state):
-            urllib2.urlopen(url + str(float(consumption)))
-            urllib2.urlopen(url + str(float(0)))
+        try:
+            if (command == 'A' and not state):
+                urllib2.urlopen(url + str(float(0)))
+                urllib2.urlopen(url + str(float(consumption)))
+            elif (command == 'E' and state):
+                urllib2.urlopen(url + str(float(consumption)))
+                urllib2.urlopen(url + str(float(0)))
+        except Exception:
+            pass
 
-    update_status(rid,command)
+    if (rid != -1):
+        update_status(rid,command)
     return ''
 
 def main():
