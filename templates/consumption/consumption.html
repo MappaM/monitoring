@@ -3,9 +3,9 @@
 {% block title %}Consumption{% endblock %}
 
 {% block content %}
-	{% load compressed %}
-	{% compressed_css 'plan' %}
-	{% compressed_css 'consumption' %}
+	{% load pipeline %}
+	{% stylesheet 'plan' %}
+	{% stylesheet 'consumption' %}
 	<h1>Consumption</h1>		
 	<script type="text/javascript" src="/static/js/highcharts.js"></script>
 	<div id ="builder_tools">
@@ -405,10 +405,10 @@
 
 	<div id="plan_message" style="clear:both;"></div>
 	<div id="plans" style=""></div>
-	{% compressed_js 'builder' %}
-	{% compressed_js 'plan' %}
-	{% compressed_js 'plan_appliance' %}
-	{% compressed_js 'plan_meter' %}
+	{% javascript 'builder' %}
+	{% javascript 'plan' %}
+	{% javascript 'plan_appliance' %}
+	{% javascript 'plan_meter' %}
 	<div id="gonext_error" class="form_error"></div>
 
 {% endblock %}

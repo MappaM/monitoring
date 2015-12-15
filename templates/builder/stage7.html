@@ -108,9 +108,9 @@
 		<a href="javascript:save(function(){location.href='/consumption/';});" class="form_btn builder_btn_next">&nbsp;</a>
 	</div>
 	</div>
-	{% load compressed %}
-	{% compressed_js 'plan_appliance' %}
-	{% compressed_js 'plan_meter' %}
+	{% load pipeline %}
+	{% javascript 'plan_appliance' %}
+	{% javascript 'plan_meter' %}
 	
 	
 {% endblock %}
