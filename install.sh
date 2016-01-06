@@ -24,10 +24,10 @@ else
         p="sudo python-pip install"
 fi
 
-$p django==1.4.10
+$p django==1.4.20
 $p pytz
 $p django-mathfilters
 $p utils
-$p wadofstuff-django-serializers
+$p --allow-unverified wadofstuff-django-serializers --allow-external wadofstuff-django-serializers  wadofstuff-django-serializers
 $p django-pipeline
 $p django-extensions

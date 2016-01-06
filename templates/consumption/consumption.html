@@ -3,9 +3,9 @@
 {% block title %}Consumption{% endblock %}
 
 {% block content %}
-	{% load compressed %}
-	{% compressed_css 'plan' %}
-	{% compressed_css 'consumption' %}
+	{% load pipeline %}
+	{% stylesheet 'plan' %}
+	{% stylesheet 'consumption' %}
 	<h1>Consumption</h1>		
 	<script type="text/javascript" src="/static/js/highcharts.js"></script>
 	<div id ="builder_tools">
@@ -131,7 +131,27 @@
 						meterResize(plans[i]);
 					}
 				}
-			}
+            }
+
+            function meterClick(event) {
+                var m = event.data.obj;
+                var hash = event.data.hash;
+                var value=$(m).data('value');
+								$.ajax({url:'/data/'+hash+'/' + value.toString(),
+									success:function() {
+										
+										if (m.hasClass('switch_on')) {
+											m.removeClass('switch_on');
+											m.addClass('switch_off');
+											m.find('div:first').html('OFF');
+										} else {
+											m.removeClass('switch_off');
+											m.addClass('switch_on');
+											m.find('div:first').html('ON');
+                                        }
+                                        $(m).data('value',(1 - value));
+                                        }});
+            }
 			
 			function createMeter(plan,meter,position) {
 				var rpos = plan.renderer.getPosition(position);
@@ -160,22 +180,9 @@
 								m.append('<div class="txt">OFF</div>');
 								m.addClass('switch_off');
 							}
-							m.append('<div class="historic"><a href="/historic/meter/' + meter.pk + '"><img src="/static/img/symbols/historic_mini.png" /></a></div>');
-							m.click(function() {
-								$.ajax({url:'/data/'+meter.hash+'/'+(1 - parseFloat(data)),
-									success:function() {
-										
-										if (m.hasClass('switch_on')) {
-											m.removeClass('switch_on');
-											m.addClass('switch_off');
-											m.find('div:first').html('OFF');
-										} else {
-											m.removeClass('switch_off');
-											m.addClass('switch_on');
-											m.find('div:first').html('ON');
-										}
-									}});
-							});
+                            m.append('<div class="historic"><a href="/historic/meter/' + meter.pk + '"><img src="/static/img/symbols/historic_mini.png" /></a></div>');
+                            m.data("value",1-parseFloat(data));
+                                m.click({obj:m,hash:meter.hash},meterClick);
 							
 						}
 					});
@@ -398,10 +405,10 @@
 
 	<div id="plan_message" style="clear:both;"></div>
 	<div id="plans" style=""></div>
-	{% compressed_js 'builder' %}
-	{% compressed_js 'plan' %}
-	{% compressed_js 'plan_appliance' %}
-	{% compressed_js 'plan_meter' %}
+	{% javascript 'builder' %}
+	{% javascript 'plan' %}
+	{% javascript 'plan_appliance' %}
+	{% javascript 'plan_meter' %}
 	<div id="gonext_error" class="form_error"></div>
 
 {% endblock %}

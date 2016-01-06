@@ -191,9 +191,9 @@ Plan.prototype.refresh = function () {
 	
 	//Process to refresh only if not refreshing is currently done
 	if (this.refreshing)  {
-		if (this.refreshAwaiting)
-			console.log("Refreshing ignored.");
-		else {
+		if (this.refreshAwaiting) {
+			//console.log("Refreshing ignored.");
+        }	else {
 			console.log("Refreshing stacked.");
 			this.refreshAwaiting = true;
 		}

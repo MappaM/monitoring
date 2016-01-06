@@ -120,9 +120,9 @@
 		<a href="javascript:save(function(){location.href='/builder/stage7/';});" class="form_btn builder_btn_next">&nbsp;</a>
 	</div>
 	
-	{% load compressed %}
-	{% compressed_js 'builder' %}
-	{% compressed_js 'plan' %}
-	{% compressed_js 'plan_appliance' %}
+	{% load pipeline %}
+	{% javascript 'builder' %}
+	{% javascript 'plan' %}
+	{% javascript 'plan_appliance' %}
 	
 {% endblock %}

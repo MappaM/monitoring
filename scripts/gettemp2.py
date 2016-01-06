@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/bin/python
 
 import serial
 import multiprocessing
@@ -9,7 +9,7 @@ def main():
     with lock:
         ser = serial.Serial('/dev/ttyUSB0',19200,timeout=1)
         ser.flushInput()
-        ser.write('T')
+        ser.write('t')
         s = ser.readline()
     print s
 

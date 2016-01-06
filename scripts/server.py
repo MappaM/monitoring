@@ -5,13 +5,13 @@ from SimpleHTTPServer import SimpleHTTPRequestHandler
 from urlparse import urlparse, parse_qs
 import relay
 from tellcore.telldus import TelldusCore
+import tellcore
 import argparse
 from threading import Thread
 from time import sleep
 import urllib2
 import thread
 import threading
-
 
 devices = [ (0,"telldus","Appareil electro"), #1
             (1,"telldus","Haut"), #2
@@ -28,14 +28,14 @@ devices = [ (0,"telldus","Appareil electro"), #1
             (0,"motion","Webcam 2"), #10
 	    (3,"telldus","Chaufferette"), #11
             (4,"telldus","Bas"), #12
-            ("/tmp/presence","fichier","Presence"), #13
-            ("/tmp/sleeping","fichier","Sleeping"),] #14
+            ("/home/tom/status/presence","fichier","Presence"), #13
+            ("/home/tom/status/sleeping","fichier","Sleeping"),] #14
 
 
 groups = {
-            'Home':(1,4,5,-6,7,8,-9,-10,13),
-            'Sleep':(-1,-2,-9,-4,-5,-7,-8,-10,-12,13,14),
-            'default':(-1,-2,9,-4,-5,-6,-7,-8,10,-12,-13,-14)}
+            'Home':(1,-2,4,5,-6,7,8,-9,-10,13,-14), #-9 en temps normal
+            'Sleep':(-1,-4,-5,-7,-8,-9,-10,-12,13,14),
+            'default':(-1,-2,-4,-5,-6,-7,-8,9,10,-12,-13,-14)}
 
 lock = threading.Lock()
 tlock = threading.Lock()
@@ -84,13 +84,22 @@ class Telldus:
     @staticmethod
     def command(command,device_id):
 	tlock.acquire(True)
+        core = TelldusCore()
+        if device_id < len(core.devices()):
+            d = core.devices()[device_id]
+        else:
+            return "Unknow id "+str(device_id)
+
         if ((command == "E") or (command == "0") or (command == 0) or (command == "OFF") or (command == False)):
             command = False
+        elif (command == "!"):
+            if d.last_sent_command(tellcore.constants.TELLSTICK_TURNON | tellcore.constants.TELLSTICK_TURNOFF)==tellcore.constants.TELLSTICK_TURNON:
+                command = False
+            else:
+                command = True
         else:
             command = True
 
-        core = TelldusCore()
-        d = core.devices()[device_id]
         if (not command):
             d.turn_off()
         elif (command):
@@ -131,6 +140,12 @@ class Relay:
 	lock.acquire(True)
         if (command == "0" or command == False):
             command = "E"
+        elif (command == "!"):
+            r = relay.relay_status(device_id);
+            if (r):
+                command = "E"
+            else:
+                command = "A"
         elif (command == "1" or command == True):
             command = "A"
         relay.relay_command(command,device_id)
@@ -144,10 +159,14 @@ class MyHandler(SimpleHTTPRequestHandler):
 
     def r404(self):
         self.send_response(404)
+        self.end_headers()
         return
 
     def __init__(self,req,client_addr,server):
             SimpleHTTPRequestHandler.__init__(self,req,client_addr,server)
+
+    def do_POST(self):
+        self._do_GET(True)
 
     def do_GET(self):
         try:
@@ -193,7 +212,6 @@ class MyHandler(SimpleHTTPRequestHandler):
         elif (uri["module"] == ["group"]):
             group_id = uri['id'][0]
             command = uri['c'][0]
-
             resp = Group.command(command,group_id)
         elif (uri["module"] == ["list"]):
             resp += "<table style=\"font-size:28px;\">"
@@ -222,6 +240,7 @@ class MyHandler(SimpleHTTPRequestHandler):
         if (write):
 		self.wfile.write(resp)
 		self.wfile.flush()
+                self.wfile.close()
 
 
 class HTTPServerV6(BaseHTTPServer.HTTPServer):
