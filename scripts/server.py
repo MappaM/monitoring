@@ -12,31 +12,33 @@ from time import sleep
 import urllib2
 import thread
 import threading
+import numbers
 
-devices = [ (0,"telldus","Appareil electro"), #1
-            (1,"telldus","Haut"), #2
-            (2,"telldus","Ordinateur"), #3
-            (1,"relay","Lampe bas"), #4
-            (4,"relay","Bloc gauche"), #5
-            (2,"relay","Radiateur"), #6
-            (8,"relay","Bloc droit"), #7
-            (16,"relay","Lampe bureau"), #8
-	    (32,"relay","Webcam 1"), #9
+devices = [ (0,"telldus","Sapin"), #1
+            (1,"telldus","Salon 1"), #2
+            (2,"telldus","Salon 2"), #3
+            (3,"telldus","Ordinateur"), #4
+            (4,"telldus","Chambre"), #5
+#            (1,"relay","Lampe bas"), #4
+#            (4,"relay","Bloc gauche"), #5
+#            (2,"relay","Radiateur"), #6
+#            (8,"relay","Bloc droit"), #7
+#            (16,"relay","Lampe bureau"), #8
+#	    (32,"relay","Webcam 1"), #9
 #	    (64,"relay","Lampe cuisine"), #10
 #	    (128,"relay","Routeur"), #11
 #	    (256,"relay","Ports USB"), #12
-            (0,"motion","Webcam 2"), #10
-	    (3,"telldus","Chaufferette"), #11
-            (4,"telldus","Bas"), #12
-            ("/home/tom/status/presence","fichier","Presence"), #13
-            ("/home/tom/status/sleeping","fichier","Sleeping"),] #14
+            (0,"motion","Webcam"), #6
+#	    (3,"telldus","Chaufferette"), #11
+#            (4,"telldus","Bas"), #12
+            ("/home/tom/status/presence","fichier","Presence"), #7
+            ("/home/tom/status/sleeping","fichier","Sleeping"),] #8
 
 
 groups = {
-            'Home':(1,-2,4,5,-6,7,8,-9,-10,13,-14), #-9 en temps normal
-            'Sleep':(-1,-4,-5,-7,-8,-9,-10,-12,13,14),
-            'default':(-1,-2,-4,-5,-6,-7,-8,9,10,-12,-13,-14)}
-
+            'Home':("Sapin","Chambre","-Webcam","Presence","-Sleeping" ),
+            'Sleep':(-1,-2,-3,"Presence","Sleeping"),
+            'default':(-1,-2,-3,"-Chambre","Webcam","-Presence","-Sleeping")}
 lock = threading.Lock()
 tlock = threading.Lock()
 
@@ -52,6 +54,16 @@ class Group:
                 group = groups['default']
 
             for did in group:
+                if not isinstance(did, numbers.Integral):
+                    inverted=False
+                    if (did[0]=='-'):
+                        did=did[1:]
+                        inverted=True
+                    for i,d in enumerate(devices):
+                        if (d[2] == did):
+                            did = -i-1 if inverted else i+1
+                            break
+
                 device = devices[abs(did) - 1]
                 if (did < 0):
                     c = not command
@@ -92,7 +104,7 @@ class Telldus:
 
         if ((command == "E") or (command == "0") or (command == 0) or (command == "OFF") or (command == False)):
             command = False
-        elif (command == "!"):
+        elif (command == "!") or (command == -1) or (command == "-1"):
             if d.last_sent_command(tellcore.constants.TELLSTICK_TURNON | tellcore.constants.TELLSTICK_TURNOFF)==tellcore.constants.TELLSTICK_TURNON:
                 command = False
             else:
