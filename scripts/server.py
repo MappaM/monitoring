@@ -181,7 +181,12 @@ class MyHandler(SimpleHTTPRequestHandler):
         self._do_GET(True)
 
     def do_GET(self):
-        self._do_GET(True)
+        try:
+            self._do_GET(True)
+        except Exception:
+            self.wfile.write("Error")
+            self.wfile.flush()
+            print "Error catched"
 
     def do_HEAD(self):
 	self._do_GET(False)
